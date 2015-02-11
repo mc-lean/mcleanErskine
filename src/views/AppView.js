@@ -13,7 +13,7 @@ define(function(require, exports, module) {
     var Modifier        = require('famous/core/Modifier');
     var Transitionable  = require('famous/transitions/Transitionable');
 
-    // Import classes
+    // Import classes 
     // var MenuView = require('views/MenuView');
     var PageView = require('views/PageView');
     var BoxData = require('data/BoxData');

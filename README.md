@@ -14,4 +14,4 @@ like IDE settings, files open, Terminals open, etc.
 
 You can create as many new workspaces as you need on your VM.
 
-Enjoy and Happy Koding!# mcleanerskine
+Enjoy and Happy Koding!
