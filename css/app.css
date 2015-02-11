@@ -1,0 +1,20 @@
+html {
+    background-color: #fff;
+    color: #000;
+}
+@font-face {
+  font-family: 'specialElite';
+  src: url(http://fonts.googleapis.com/css?family=Special+Elite);
+}
+@import url(http://fonts.googleapis.com/css?family=Special+Elite);
+.double-sided {
+    -webkit-backface-visibility: visible;
+    backface-visibility: visible;
+}
+
+body {
+	background-image: url(https://s3.amazonaws.com/elasticbeanstalk-us-east-1-538093400772/mcleanErskine/ggBridgeBackground.jpg);
+	background-size: cover;
+	background-position: bottom;
+	background-repeat: no-repeat;
+}
