@@ -59,11 +59,15 @@ define(function(require, exports, module) {
         this.angles = [];
         this.scales = [];
         this.align  = [];
+        this.z = [];
         
+        console.log(opts.pageData);
         opts.pageData.forEach(function(page, i){
             var angle = new Transitionable(opts.defaultAngle),
                 offset = new Transitionable([pageOffset, 0.5]),
-                scale = new Transitionable(0);
+                scale = new Transitionable(0),
+                z = new Transitionable(0.122222);
+                
             
             var singlePage = new Surface({
                 content: page.title,
@@ -72,26 +76,28 @@ define(function(require, exports, module) {
                     backgroundColor: 'rgba(255, 255, 255, 0.30)',
                     border: "2px solid rgba(0, 0, 0, 0.23)",
                     textAlign: 'right',
-                    cursor: 'pointer',
-                    zIndex: 1
+                    cursor: 'pointer'
                 }
             });
             
-            var pageModifier = new Modifier({
-                transform: function (){
-                    return Transform.rotateY(angle.get());
-                }
-            });
-            
+            pageModifier = new Modifier();
+                   
             //Add Transitionable to move the elemnts around via align and origin
             pageModifier
+                .transformFrom(function(){ return Transform.rotateY(angle.get()); })
                 .originFrom(function(){ return offset.get(); })
                 .alignFrom(function(){ return offset.get(); });
             
             var scaleModifier = new Modifier({
                 transform: function(){
                     var startScale = scale.get();
-                    return Transform.scale(startScale, startScale, 1);
+                    return Transform.scale(startScale, startScale, startScale);
+                }
+            });
+            
+            var zModifier = new Modifier({
+                transform: function(){
+                    return Transform.translate(0,0,z.get());
                 }
             });
             
@@ -101,11 +107,16 @@ define(function(require, exports, module) {
             this.origins.push(offset);
             this.angles.push(angle);
             this.scales.push(scale);
+            this.z.push(z);
+            
             
             this
+            .add(zModifier)
             .add(pageModifier)
             .add(scaleModifier)
             .add(singlePage);
+            
+            Page = this.pageModifiers;
 
             pageOffset += 0.3;
             
@@ -123,8 +134,8 @@ define(function(require, exports, module) {
     };
     
     PageView.prototype.boxSize = function(){
-        var windowWidth = window.innerWidth,
-            windowHeight = window.innerHeight,
+        var windowHeight = window.innerHeight,
+            windowWidth = window.innerWidth,
             boxSize = [200,300];
             
         return boxSize;
@@ -135,42 +146,35 @@ define(function(require, exports, module) {
             currentPage = this.currentPage,
             center = [0.5, 0.5],
             newPage = page.id,
-            x = newPage - 1;
+            x = newPage;
         
         if(newPage === currentPage){
             console.log("same page");
             this.zoomOut(x);
             return;
         }
-        // this.pageModifiers[x].transformFrom(Transform.inFront);
-        // this.pageModifiers.forEach(function(modifier, z){
-        //     if(z != x){
-        //         console.log(Transform.behind);
-        //         modifier.transformFrom(Transform.behind);
-        //     } else {
-        //         modifier.transformFrom(Transform.inFront);
-        //     }
-        // });
+
         //Math to center selected origin
         var moveOrigin = this.origins[x].get()[0] - 0.5;
         
-        // Move front and cener
+        // Move front and center
         this.origins.forEach(function(origin, z){
             var move = [origin.get()[0] - moveOrigin, 0.5];
             
             origin.set(move, { duration: 1000, curve: 'easeInOut' });
         });
         
-            
-        // this.pageModifiers[x].setTransform(Transform.inFront);
+        
+        
+        this.z[x].set(1);       // Increase the Z index
+        
         this.scales[x].set(         //move Scale up 
             0.5, trans, 
             function(){
-                this.angles[x].set(
+                this.angles[x].set(         //Spin the page
                     3.14, trans,
                     function(){
-                        this.scales[x].set(1, trans);
-                        // console.log(Transform.inFront);
+                        this.scales[x].set(1, trans);       //Finish the zoom in
                     }.bind(this));
         }.bind(this));
 
@@ -180,8 +184,8 @@ define(function(require, exports, module) {
     
     PageView.prototype.zoomOut = function(page){
         var trans = { duration: 1000, curve: 'easeIn' };
-        console.log("zoom otu");
-        console.log(this.origins[page]);
+        
+        this.z[page].set(0);
         
         this.scales[page].set(
             0.2, trans, 
