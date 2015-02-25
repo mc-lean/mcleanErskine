@@ -128,6 +128,7 @@ define(function(require, exports, module) {
             });
             
             singlePage.on('click', function(){ this.changePage(page) }.bind(this));
+            otherSide.on('click', function(){ this.zoomOut(i); }.bind(this));
             
             this.otherSideModifiers.push(otherSideModifier);
             this.pageModifiers.push(pageModifier);
@@ -215,16 +216,15 @@ define(function(require, exports, module) {
         this.currentPage = newPage;
     };
     
-    PageView.prototype.zoomOut = function(page){
+    PageView.prototype.zoomOut = function(x){
         var trans = { duration: 1000, curve: 'easeIn' };
         
-        this.z[page].set(0);
-        
-        this.scales[page].set(
+        this.opacities[x].set(0, trans);
+        this.scales[x].set(
             0.2, trans, 
             function(){
-                this.angles[page].set(this.options.defaultAngle, trans);
-                this.flipAngles[page].set(-this.options.defaultAngle, trans);
+                this.angles[x].set(this.options.defaultAngle, trans);
+                
         }.bind(this));
         
         this.currentPage = null;
