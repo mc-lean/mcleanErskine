@@ -77,7 +77,7 @@ define(function(require, exports, module) {
                     border: "2px solid rgba(0, 0, 0, 0.23)",
                     textAlign: 'right',
                     cursor: 'pointer'
-                }
+                } 
             });
             
             pageModifier = new Modifier();
