@@ -53,10 +53,11 @@ define(function(require, exports, module) {
             pageOffset  = opts.pagePosition,
             scaleTo     = window.innerWidth / 4 - 50;
         
+        this.otherSideModifiers = [];
         this.pageModifiers = [];
         this.pageRotations = [];
+        this.opacities = [];
         this.origins = [];
-        this.xAngles = [];
         this.angles = [];
         this.scales = [];
         this.align  = [];
@@ -64,10 +65,10 @@ define(function(require, exports, module) {
         
         
         opts.pageData.forEach(function(page, i){
-            var xAngle = new Transitionable(-opts.defaultAngle),
-                offset = new Transitionable([pageOffset, 0.5]),
+            var offset = new Transitionable([pageOffset, 0.5]),
                 angle = new Transitionable(opts.defaultAngle),
                 z = new Transitionable(0.122222),
+                opacity = new Transitionable(0),
                 scale = new Transitionable(0);
                 
             
@@ -99,26 +100,10 @@ define(function(require, exports, module) {
             
             var zModifier = new Modifier({
                 transform: function(){
-                    return Transform.translate(0,0,z.get());
+                    return Transform.translate(0,0,0);
                 }
             });
             
-            singlePage.on('click', function(){ this.changePage(page) }.bind(this));
-            
-            this.pageModifiers.push(pageModifier);
-            this.origins.push(offset);
-            this.xAngles.push(xAngle);
-            this.angles.push(angle);
-            this.scales.push(scale);
-            this.z.push(z);
-            
-            
-            this
-                .add(zModifier)
-                .add(pageModifier)
-                .add(scaleModifier)
-                .add(singlePage);
-                
             var otherSide = new Surface({
                 content: page.title,
                 properties: {
@@ -130,9 +115,10 @@ define(function(require, exports, module) {
             var otherSideModifier = new Modifier();
             
             otherSideModifier
-                .transformFrom(function(){ return Transform.rotateY(xAngle.get()); })
                 .originFrom(function(){ return offset.get(); })
-                .alignFrom(function(){ return offset.get(); });
+                .alignFrom(function(){ return offset.get(); })
+                .transformFrom(Transform.translate(0,0,-1))
+                .opacityFrom(function(){return opacity.get(); });
             
             var otherSideScaleModifier = new Modifier({
                 transform: function(){
@@ -141,6 +127,25 @@ define(function(require, exports, module) {
                 }
             });
             
+            singlePage.on('click', function(){ this.changePage(page) }.bind(this));
+            
+            this.otherSideModifiers.push(otherSideModifier);
+            this.pageModifiers.push(pageModifier);
+            this.opacities.push(opacity);
+            this.origins.push(offset);
+            this.angles.push(angle);
+            this.scales.push(scale);
+            this.z.push(z);
+            
+            
+            this
+                .add(zModifier)
+                .add(pageModifier)
+                .add(scaleModifier)
+                .add(singlePage);
+
+
+            // Add the other side that has the content
             this
                 .add(otherSideModifier)
                 .add(otherSideScaleModifier)
@@ -192,10 +197,7 @@ define(function(require, exports, module) {
             origin.set(move, { duration: 1000, curve: 'easeInOut' });
         });
         
-        
-        
-        this.z[x].set(1);       // Increase the Z index
-        
+
         this.scales[x].set(         //move Scale up 
             0.5, trans, 
             function(){
@@ -203,11 +205,13 @@ define(function(require, exports, module) {
                     3.14, trans,
                     function(){
                         this.scales[x].set(1, trans);       //Finish the zoom in
+                        
+                        this.otherSideModifiers[x]          //Show content Surface
+                            .transformFrom(Transform.translate(0,0,2));
+                        this.opacities[x].set(1, trans);
                     }.bind(this));
-                this.xAngles[x].set(3.14, trans);
         }.bind(this));
 
-        console.log(this.origins);
         this.currentPage = newPage;
     };
     
@@ -220,7 +224,7 @@ define(function(require, exports, module) {
             0.2, trans, 
             function(){
                 this.angles[page].set(this.options.defaultAngle, trans);
-                this.xAngles[page].set(-this.options.defaultAngle, trans);
+                this.flipAngles[page].set(-this.options.defaultAngle, trans);
         }.bind(this));
         
         this.currentPage = null;
