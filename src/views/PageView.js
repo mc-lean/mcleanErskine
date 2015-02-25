@@ -56,17 +56,19 @@ define(function(require, exports, module) {
         this.pageModifiers = [];
         this.pageRotations = [];
         this.origins = [];
+        this.xAngles = [];
         this.angles = [];
         this.scales = [];
         this.align  = [];
         this.z = [];
         
-        console.log(opts.pageData);
+        
         opts.pageData.forEach(function(page, i){
-            var angle = new Transitionable(opts.defaultAngle),
+            var xAngle = new Transitionable(-opts.defaultAngle),
                 offset = new Transitionable([pageOffset, 0.5]),
-                scale = new Transitionable(0),
-                z = new Transitionable(0.122222);
+                angle = new Transitionable(opts.defaultAngle),
+                z = new Transitionable(0.122222),
+                scale = new Transitionable(0);
                 
             
             var singlePage = new Surface({
@@ -105,19 +107,45 @@ define(function(require, exports, module) {
             
             this.pageModifiers.push(pageModifier);
             this.origins.push(offset);
+            this.xAngles.push(xAngle);
             this.angles.push(angle);
             this.scales.push(scale);
             this.z.push(z);
             
             
             this
-            .add(zModifier)
-            .add(pageModifier)
-            .add(scaleModifier)
-            .add(singlePage);
+                .add(zModifier)
+                .add(pageModifier)
+                .add(scaleModifier)
+                .add(singlePage);
+                
+            var otherSide = new Surface({
+                content: page.title,
+                properties: {
+                    backgroundColor: "green",
+                    textAlign: 'right'
+                }
+            });
             
-            Page = this.pageModifiers;
-
+            var otherSideModifier = new Modifier();
+            
+            otherSideModifier
+                .transformFrom(function(){ return Transform.rotateY(xAngle.get()); })
+                .originFrom(function(){ return offset.get(); })
+                .alignFrom(function(){ return offset.get(); });
+            
+            var otherSideScaleModifier = new Modifier({
+                transform: function(){
+                    var startScale = scale.get();
+                    return Transform.scale(startScale, startScale, startScale);
+                }
+            });
+            
+            this
+                .add(otherSideModifier)
+                .add(otherSideScaleModifier)
+                .add(otherSide);
+            
             pageOffset += 0.3;
             
             scale.set(0.2, {duration: 2000, curve: Easing.outBack});
@@ -176,6 +204,7 @@ define(function(require, exports, module) {
                     function(){
                         this.scales[x].set(1, trans);       //Finish the zoom in
                     }.bind(this));
+                this.xAngles[x].set(3.14, trans);
         }.bind(this));
 
         console.log(this.origins);
@@ -191,6 +220,7 @@ define(function(require, exports, module) {
             0.2, trans, 
             function(){
                 this.angles[page].set(this.options.defaultAngle, trans);
+                this.xAngles[page].set(-this.options.defaultAngle, trans);
         }.bind(this));
         
         this.currentPage = null;
