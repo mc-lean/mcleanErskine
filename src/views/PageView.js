@@ -4,15 +4,17 @@ var Page;
 define(function(require, exports, module) {
 
     // Import additional modules to be used in this view 
-    var View            = require('famous/core/View');
-    var Surface         = require('famous/core/Surface');
-    var Transform       = require('famous/core/Transform');
+    var Transitionable  = require('famous/transitions/Transitionable');
     var StateModifier   = require('famous/modifiers/StateModifier');
     var ImageSurface    = require('famous/surfaces/ImageSurface');
-    var EventHandler    = require('famous/core/EventHandler');
     var Easing          = require('famous/transitions/Easing');
+    var EventHandler    = require('famous/core/EventHandler');
+    var Transform       = require('famous/core/Transform');
     var Modifier        = require('famous/core/Modifier');
-    var Transitionable  = require('famous/transitions/Transitionable');
+    var Surface         = require('famous/core/Surface');
+    var View            = require('famous/core/View');
+    
+    var ContentView = require('views/ContentView');
     
     var eventHandler    = new EventHandler();
 
@@ -104,21 +106,18 @@ define(function(require, exports, module) {
                 }
             });
             
-            var otherSide = new Surface({
-                content: page.title,
-                properties: {
-                    backgroundColor: "green",
-                    textAlign: 'right'
-                }
-            });
             
+            // CREATE CONTENT SIDE 
+            
+            var content = new ContentView({ pageInfo : page });
+
             var otherSideModifier = new Modifier();
             
             otherSideModifier
                 .originFrom(function(){ return offset.get(); })
                 .alignFrom(function(){ return offset.get(); })
                 .transformFrom(Transform.translate(0,0,-1))
-                .opacityFrom(function(){return opacity.get(); });
+                .opacityFrom(function(){ return opacity.get(); });
             
             var otherSideScaleModifier = new Modifier({
                 transform: function(){
@@ -128,7 +127,7 @@ define(function(require, exports, module) {
             });
             
             singlePage.on('click', function(){ this.changePage(page) }.bind(this));
-            otherSide.on('click', function(){ this.zoomOut(i); }.bind(this));
+            content.on('zoomOut', function(){ this.zoomOut(i); }.bind(this));
             
             this.otherSideModifiers.push(otherSideModifier);
             this.pageModifiers.push(pageModifier);
@@ -150,7 +149,7 @@ define(function(require, exports, module) {
             this
                 .add(otherSideModifier)
                 .add(otherSideScaleModifier)
-                .add(otherSide);
+                .add(content);
             
             pageOffset += 0.3;
             
@@ -219,13 +218,12 @@ define(function(require, exports, module) {
     PageView.prototype.zoomOut = function(x){
         var trans = { duration: 1000, curve: 'easeIn' };
         
-        this.opacities[x].set(0, trans);
-        this.scales[x].set(
-            0.2, trans, 
-            function(){
-                this.angles[x].set(this.options.defaultAngle, trans);
-                
-        }.bind(this));
+        this.otherSideModifiers[x]          //Show content Surface
+            .transformFrom(Transform.translate(0,0,-1));
+            
+        this.opacities[x].set(0, {duration: 200, curve: 'easeIn'});
+        this.scales[x].set(0.2, trans);
+        this.angles[x].set(this.options.defaultAngle, trans);
         
         this.currentPage = null;
     };

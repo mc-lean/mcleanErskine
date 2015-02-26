@@ -153,7 +153,7 @@ define(function(require, exports, module) {
 
         menuAnimateListener.on('menuToggle', function(element){
             this.animateBoxes(element);
-        }.bind(this))
+        }.bind(this));
 
         navListener.on('showMenu', function(){
             console.log('show menu');

@@ -16,7 +16,6 @@ define(function(require, exports, module) {
     // Import classes 
     // var MenuView = require('views/MenuView');
     var PageView = require('views/PageView');
-    var BoxData = require('data/BoxData');
     var PageData = require('data/PageData');
 
     // Constructor function for our AppView class
