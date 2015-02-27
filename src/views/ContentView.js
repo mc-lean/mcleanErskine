@@ -71,17 +71,20 @@ define(function(require, exports, module) {
         },
         music : function(){
             
-            var sequentialLayout = new SequentialLayout({ direction : 0 }),
+            var surface = new RenderNode(),
                 opts = this.options,
-                surfaces = [];
+                surfaces = [],
+                x = 0;
             
             this.videoSurfaceModifiers = [];
             this.sizeModifiers = [];
+            this.xTransitions = [];
             
             
             MusicData.forEach(function(song, i){
                 
-                var sizeModifier = new Transitionable([opts.videoSurfaceSize, undefined]);
+                var sizeModifier = new Transitionable([opts.videoSurfaceSize, undefined]),
+                    xTransition = new Transitionable(x);
                 
                 var videoSurface = new Surface({
                     // content: "<iframe width='100%' height='100%' src="+ MusicData[i].src +" frameborder='0' allowfullscreen></iframe>",
@@ -92,33 +95,34 @@ define(function(require, exports, module) {
                 });
                 
                 
-                var videoSurfaceModifier = new Modifier();
+                var videoSurfaceModifier = new Modifier({
+                    // transform: function(){
+                    //     var xTrans = xTransition.get();
+                    //     return Transform.translate(xTrans, 0,0);
+                    // }
+                });
 
                 videoSurfaceModifier
-                    .sizeFrom( sizeModifier );
+                    .transformFrom( function(){ return Transform.translate(xTransition.get(), 0, 0) })
+                    .sizeFrom( function(){ return sizeModifier.get() });
                 
-                var surface = new RenderNode(videoSurfaceModifier);
-
                 
-                surface.add(videoSurface);
+                surface
+                    .add(videoSurfaceModifier)
+                    .add(videoSurface);
                 
                 videoSurface.on("click", function(){ this.videoFocus(i); }.bind(this));
                 
                 this.videoSurfaceModifiers.push(videoSurfaceModifier);
                 this.sizeModifiers.push(sizeModifier);
+                this.xTransitions.push(xTransition);
                 
+                x += opts.videoSurfaceSize;
                 surfaces.push(surface);
                 
             }.bind(this));
 
-            
-            sequentialLayout
-                .sequenceFrom(surfaces);
-                // .setOptions({ origin: [1,0]});
-            
-            console.log(sequentialLayout);
-            
-            return sequentialLayout;
+            return surface;
             
         },
         resume : function(){
@@ -132,14 +136,11 @@ define(function(require, exports, module) {
     
     ContentView.prototype.videoFocus = function(x){
         
-        console.log(this.videoSurfaceModifiers[x]);
+        this.videoSurfaceModifiers[x].transformFrom(Transform.inFront);
+        this.xTransitions[x].set(0, {duration: 1000, curve: 'easeIn'});
         
-        this.videoSurfaceModifiers[x]
-            // .originFrom([-0.5,0])
-            // .alignFrom([1,0])
-            .transformFrom(Transform.translate(-400, 0,1));
             
-        //this.sizeModifiers[x].set([undefined, undefined], { duration: 500, curve: 'easeIn' });
+        this.sizeModifiers[x].set([undefined, undefined], { duration: 500, curve: 'easeIn' });
     };
 
     module.exports = ContentView;
