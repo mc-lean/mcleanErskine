@@ -96,6 +96,7 @@ define(function(require, exports, module) {
                     size: sizeModifier
                 });
                 
+                //Use RenderNode to add the Modifier to the surface for sequential Layout
                 var surface = new RenderNode(gridModifier);
                 
                 surface.add(grid);
