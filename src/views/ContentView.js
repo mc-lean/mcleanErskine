@@ -32,7 +32,7 @@ define(function(require, exports, module) {
 
     // Default options for ContentView class
     ContentView.DEFAULT_OPTIONS = {
-        gridSize: window.innerWidth / MusicData.length,
+        videoSurfaceSize: window.innerWidth / MusicData.length,
         pageInfo: {}
     };
     
@@ -62,7 +62,6 @@ define(function(require, exports, module) {
         this.layout.header.add(header);
         this.add(this.layout);
         
-        console.log(this.layout);
     }
 
     var page = {
@@ -80,9 +79,9 @@ define(function(require, exports, module) {
             
             MusicData.forEach(function(song, i){
                 
-                var sizeModifier = new Transitionable([opts.gridSize, undefined]);
+                var sizeModifier = new Transitionable([opts.videoSurfaceSize, undefined]);
                 
-                var grid = new Surface({
+                var videoSurface = new Surface({
                     // size: [window.innerWidth / MusicData.length, undefined],
                     // content: "<iframe width='100%' height='100%' src="+ MusicData[i].src +" frameborder='0' allowfullscreen></iframe>",
                     properties : {
@@ -92,15 +91,16 @@ define(function(require, exports, module) {
                 });
                 
                 
-                var gridModifier = new Modifier({
-                    size: sizeModifier
-                });
+                var videoSurfaceModifier = new Modifier();
+
+                videoSurfaceModifier
+                    .sizeFrom(function(){ return sizeModifier; });
                 
-                var surface = new RenderNode(gridModifier);
+                var surface = new RenderNode(videoSurfaceModifier);
                 
-                surface.add(grid);
+                surface.add(videoSurface);
                 
-                grid.on("click", function(){ this.videoFocus(i); }.bind(this));
+                videoSurface.on("click", function(){ this.videoFocus(i); }.bind(this));
                 
                 this.sizeModifiers.push(sizeModifier);
                 
