@@ -67,7 +67,7 @@ define(function(require, exports, module) {
         
         
         opts.pageData.forEach(function(page, i){
-            var offset = new Transitionable([pageOffset, 0.5]),
+            var offset = new Transitionable([pageOffset, 0.7]),
                 angle = new Transitionable(opts.defaultAngle),
                 z = new Transitionable(0.122222),
                 opacity = new Transitionable(0),
@@ -221,7 +221,7 @@ define(function(require, exports, module) {
         this.otherSideModifiers[x]          //Show content Surface
             .transformFrom(Transform.translate(0,0,-1));
             
-        this.opacities[x].set(0, {duration: 200, curve: 'easeIn'});
+        this.opacities[x].set(0, {duration: 300, curve: 'easeIn'});
         this.scales[x].set(0.2, trans);
         this.angles[x].set(this.options.defaultAngle, trans);
         

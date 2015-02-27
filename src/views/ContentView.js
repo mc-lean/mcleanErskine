@@ -32,7 +32,7 @@ define(function(require, exports, module) {
 
     // Default options for ContentView class
     ContentView.DEFAULT_OPTIONS = {
-        gridSize: window.innerWidth / MusicData.length,
+        videoSurfaceSize: window.innerWidth / MusicData.length,
         pageInfo: {}
     };
     
@@ -62,7 +62,6 @@ define(function(require, exports, module) {
         this.layout.header.add(header);
         this.add(this.layout);
         
-        console.log(this.layout);
     }
 
     var page = {
@@ -75,15 +74,16 @@ define(function(require, exports, module) {
             var sequentialLayout = new SequentialLayout({ direction : 0 }),
                 opts = this.options,
                 surfaces = [];
-                
-            this.sizeModifiers = [],
+            
+            this.videoSurfaceModifiers = [];
+            this.sizeModifiers = [];
+            
             
             MusicData.forEach(function(song, i){
                 
-                var sizeModifier = new Transitionable([opts.gridSize, undefined]);
+                var sizeModifier = new Transitionable([opts.videoSurfaceSize, undefined]);
                 
-                var grid = new Surface({
-                    // size: [window.innerWidth / MusicData.length, undefined],
+                var videoSurface = new Surface({
                     // content: "<iframe width='100%' height='100%' src="+ MusicData[i].src +" frameborder='0' allowfullscreen></iframe>",
                     properties : {
                         backgroundColor : "hsl(" + (i * 360 / 10) + ", 100%, 50%)",
@@ -92,17 +92,19 @@ define(function(require, exports, module) {
                 });
                 
                 
-                var gridModifier = new Modifier({
-                    size: sizeModifier
-                });
+                var videoSurfaceModifier = new Modifier();
+
+                videoSurfaceModifier
+                    .sizeFrom( sizeModifier );
                 
-                //Use RenderNode to add the Modifier to the surface for sequential Layout
-                var surface = new RenderNode(gridModifier);
+                var surface = new RenderNode(videoSurfaceModifier);
+
                 
-                surface.add(grid);
+                surface.add(videoSurface);
                 
-                grid.on("click", function(){ this.videoFocus(i); }.bind(this));
+                videoSurface.on("click", function(){ this.videoFocus(i); }.bind(this));
                 
+                this.videoSurfaceModifiers.push(videoSurfaceModifier);
                 this.sizeModifiers.push(sizeModifier);
                 
                 surfaces.push(surface);
@@ -110,12 +112,13 @@ define(function(require, exports, module) {
             }.bind(this));
 
             
-            sequentialLayout.sequenceFrom(surfaces);
+            sequentialLayout
+                .sequenceFrom(surfaces);
+                // .setOptions({ origin: [1,0]});
+            
+            console.log(sequentialLayout);
             
             return sequentialLayout;
-            
-            // this.layout.content
-            //     .add(sequentialLayout);
             
         },
         resume : function(){
@@ -129,9 +132,14 @@ define(function(require, exports, module) {
     
     ContentView.prototype.videoFocus = function(x){
         
-        // console.log(this.surfaces[x]);
-        // this.surfaces[x].setTransform(Transform.translate(200,200,2), { duration: 1000, curve: 'easeIn' });
-        this.sizeModifiers[x].set([200, undefined], { duration: 1000, curve: 'easeIn' });
+        console.log(this.videoSurfaceModifiers[x]);
+        
+        this.videoSurfaceModifiers[x]
+            // .originFrom([-0.5,0])
+            // .alignFrom([1,0])
+            .transformFrom(Transform.translate(-400, 0,1));
+            
+        //this.sizeModifiers[x].set([undefined, undefined], { duration: 500, curve: 'easeIn' });
     };
 
     module.exports = ContentView;
