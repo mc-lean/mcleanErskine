@@ -20,7 +20,7 @@ define(function(require, exports, module) {
     function ContentView() {
 
         // Applies View's constructor function to ContentView class
-        View.apply(this, arguments);
+        View.apply(this, arguments); 
         
         
         _createContent.call(this);
@@ -38,6 +38,7 @@ define(function(require, exports, module) {
     
     function _createContent(){
         var pageInfo = this.options.pageInfo;
+        this.xOut = new Transitionable(0);
         
         this.layout = new HeaderFooterLayout({
             headerSize: 60
@@ -54,11 +55,41 @@ define(function(require, exports, module) {
         
         var content = page[pageInfo.title].call(this);
         
+        var closeX = new Surface({
+            size: [20,20],
+            content: "X",
+            properties: {
+                fontFamily: "arial",
+                fontWeight: "bold",
+                cursor: "pointer",
+                fontSize: "20px",
+                color: "white"
+            }
+        });
+        
+        var closeXModifier = new Modifier({
+            transform: Transform.translate(0,0,1),
+            origin: [1,0]
+        });
+        
+        closeXModifier.opacityFrom(function(){ return this.xOut.get(); }.bind(this));
+        
+        var closeOut = new RenderNode(closeXModifier);
+        
+        closeOut.add(closeX);
+        
         header.on("click", function(){
             this._eventOutput.emit('zoomOut');
         }.bind(this));
         
-        this.layout.content.add(content);
+        closeX.on("click", function(){
+            this._eventOutput.emit("videoBlur");
+        }.bind(this));
+        
+        this.layout.content
+            .add(content)
+            .add(closeOut);
+            
         this.layout.header.add(header);
         this.add(this.layout);
         
@@ -79,12 +110,14 @@ define(function(require, exports, module) {
             this.videoSurfaceModifiers = [];
             this.sizeModifiers = [];
             this.xTransitions = [];
+            this.zS = [];
             
             
             MusicData.forEach(function(song, i){
                 
                 var sizeModifier = new Transitionable([opts.videoSurfaceSize, undefined]),
-                    xTransition = new Transitionable(x);
+                    xTransition  = new Transitionable(x),
+                    z = new Transitionable(0);
                 
                 var videoSurface = new Surface({
                     // content: "<iframe width='100%' height='100%' src="+ MusicData[i].src +" frameborder='0' allowfullscreen></iframe>",
@@ -94,18 +127,11 @@ define(function(require, exports, module) {
                     }
                 });
                 
-                
-                var videoSurfaceModifier = new Modifier({
-                    // transform: function(){
-                    //     var xTrans = xTransition.get();
-                    //     return Transform.translate(xTrans, 0,0);
-                    // }
-                });
+                var videoSurfaceModifier = new Modifier();
 
                 videoSurfaceModifier
-                    .transformFrom( function(){ return Transform.translate(xTransition.get(), 0, 0) })
+                    .transformFrom( function(){ return Transform.translate(xTransition.get(), 0, z.get()) })
                     .sizeFrom( function(){ return sizeModifier.get() });
-                
                 
                 surface
                     .add(videoSurfaceModifier)
@@ -116,6 +142,7 @@ define(function(require, exports, module) {
                 this.videoSurfaceModifiers.push(videoSurfaceModifier);
                 this.sizeModifiers.push(sizeModifier);
                 this.xTransitions.push(xTransition);
+                this.zS.push(z);
                 
                 x += opts.videoSurfaceSize;
                 surfaces.push(surface);
@@ -136,11 +163,19 @@ define(function(require, exports, module) {
     
     ContentView.prototype.videoFocus = function(x){
         
-        this.videoSurfaceModifiers[x].transformFrom(Transform.inFront);
-        this.xTransitions[x].set(0, {duration: 1000, curve: 'easeIn'});
+        this.zS[x].set(1);
+        this.xTransitions[x].set(1, {duration: 500, curve: 'easeIn'});
+        // this.videoSurfaceModifiers[x]
+        //     .transformFrom(Transform.translate(0,0,2));
         
-            
-        this.sizeModifiers[x].set([undefined, undefined], { duration: 500, curve: 'easeIn' });
+        
+        this.sizeModifiers[x].set(
+            [window.innerWidth, undefined], 
+            { duration: 500, curve: 'easeIn' }, 
+            function(){ 
+                this.xOut.set(1, {duration: 500, curve: 'easeIn'}); 
+                
+            }.bind(this));
     };
 
     module.exports = ContentView;
