@@ -8,6 +8,7 @@ define(function(require, exports, module) {
     var HeaderFooterLayout  = require("famous/views/HeaderFooterLayout");
     var SequentialLayout    = require("famous/views/SequentialLayout");
     var Easing              = require('famous/transitions/Easing');
+    var EventHandler        = require('famous/core/EventHandler');
     var RenderNode          = require('famous/core/RenderNode');
     var Transform           = require('famous/core/Transform');
     var Modifier            = require('famous/core/Modifier');
@@ -17,13 +18,17 @@ define(function(require, exports, module) {
     var MusicData = require('data/MusicData');
 
     // Constructor function for our ContentView class
-    function ContentView() {
+    function ContentView() { 
 
         // Applies View's constructor function to ContentView class
         View.apply(this, arguments); 
         
+        this.currentPage = null;
+        this.originalPoition = null;
         
         _createContent.call(this);
+        
+        _setListeners.call(this);
     }
 
     // Establishes prototype chain for ContentView class to inherit from View
@@ -39,6 +44,7 @@ define(function(require, exports, module) {
     function _createContent(){
         var pageInfo = this.options.pageInfo;
         this.xOut = new Transitionable(0);
+        this.xOutEvents = new EventHandler();
         
         this.layout = new HeaderFooterLayout({
             headerSize: 60
@@ -82,9 +88,13 @@ define(function(require, exports, module) {
             this._eventOutput.emit('zoomOut');
         }.bind(this));
         
+        
         closeX.on("click", function(){
-            this._eventOutput.emit("videoBlur");
+            this.xOutEvents.emit("videoBlur");
         }.bind(this));
+        
+        // console.log(this.xOutEvents);
+        
         
         this.layout.content
             .add(content)
@@ -93,6 +103,12 @@ define(function(require, exports, module) {
         this.layout.header.add(header);
         this.add(this.layout);
         
+    }
+    
+    function _setListeners(){
+        this.xOutEvents.on('videoBlur', function(){
+            this.videoBlur(this.currentPage);
+        }.bind(this));
     }
 
     var page = {
@@ -161,19 +177,40 @@ define(function(require, exports, module) {
     };
     // Define your helper functions and prototype methods here
     
+    ContentView.prototype.videoBlur = function(x){
+        
+        var animation = { duration: 500, curve: 'easeIn' };
+        
+        this.xTransitions[x].set(this.originalPoition, animation);
+        
+        this.sizeModifiers[x].set(
+            [this.options.videoSurfaceSize, undefined], 
+            animation, 
+            function(){ 
+                
+                this.zS[x].set(0); 
+                
+            }.bind(this)
+        );
+        
+        this.xOut.set(0, animation); 
+    };
+    
     ContentView.prototype.videoFocus = function(x){
         
-        this.zS[x].set(1);
-        this.xTransitions[x].set(1, {duration: 500, curve: 'easeIn'});
-        // this.videoSurfaceModifiers[x]
-        //     .transformFrom(Transform.translate(0,0,2));
+        var animation = { duration: 500, curve: 'easeIn' };
         
+        this.zS[x].set(1);
+        this.currentPage = x;
+        this.originalPoition = this.xTransitions[x].get();
+        this.xTransitions[x].set(1, animation);
         
         this.sizeModifiers[x].set(
             [window.innerWidth, undefined], 
-            { duration: 500, curve: 'easeIn' }, 
+            animation, 
             function(){ 
-                this.xOut.set(1, {duration: 500, curve: 'easeIn'}); 
+                
+                this.xOut.set(1, animation); 
                 
             }.bind(this));
     };
