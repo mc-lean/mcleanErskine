@@ -175,14 +175,14 @@ define(function(require, exports, module) {
     };
     
     PageView.prototype.changePage = function(page){
-        var trans = { duration: 1000, curve: 'easeIn' },
+        var trans = { duration: 600, curve: 'easeIn' },
             currentPage = this.currentPage,
             center = [0.5, 0.5],
             newPage = page.id,
             x = newPage;
         
         if(newPage === currentPage){
-            console.log("same page");
+            
             this.zoomOut(x);
             return;
         }
@@ -194,23 +194,22 @@ define(function(require, exports, module) {
         this.origins.forEach(function(origin, z){
             var move = [origin.get()[0] - moveOrigin, 0.5];
             
-            origin.set(move, { duration: 1000, curve: 'easeInOut' });
+            origin.set(move, { duration: 800, curve: 'easeInOut' });
         });
         
 
-        this.scales[x].set(         //move Scale up 
-            0.5, trans, 
+        this.scales[x].set(0.5, trans);         //move Scale up 
+            
+        this.angles[x].set(         //Spin the page
+            3.14, trans,
             function(){
-                this.angles[x].set(         //Spin the page
-                    3.14, trans,
-                    function(){
-                        this.scales[x].set(1, trans);       //Finish the zoom in
-                        
-                        this.otherSideModifiers[x]          //Show content Surface
-                            .transformFrom(Transform.translate(0,0,2));
-                        this.opacities[x].set(1, trans);
-                    }.bind(this));
-        }.bind(this));
+                this.scales[x].set(1, trans);       //Finish the zoom in
+                
+                this.otherSideModifiers[x]          //Show content Surface
+                    .transformFrom(Transform.translate(0,0,2));
+                this.opacities[x].set(1, { duration: 1000, curve: 'easeIn' });
+            }.bind(this)
+        );
 
         this.currentPage = newPage;
     };
@@ -221,9 +220,13 @@ define(function(require, exports, module) {
         this.otherSideModifiers[x]          //Show content Surface
             .transformFrom(Transform.translate(0,0,-1));
             
-        this.opacities[x].set(0, {duration: 300, curve: 'easeIn'});
-        this.scales[x].set(0.2, trans);
-        this.angles[x].set(this.options.defaultAngle, trans);
+        this.opacities[x].set(0, {duration: 200, curve: 'easeIn'}, 
+            function(){
+            
+            this.scales[x].set(0.2, trans);
+            this.angles[x].set(this.options.defaultAngle, trans);
+            
+        }.bind(this));
         
         this.currentPage = null;
     };

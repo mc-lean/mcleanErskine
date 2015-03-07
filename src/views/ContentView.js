@@ -41,6 +41,12 @@ define(function(require, exports, module) {
         pageInfo: {}
     };
     
+    function _setListeners(){
+        this.xOutEvents.on('videoBlur', function(){
+            this.videoBlur(this.currentPage);
+        }.bind(this));
+    }
+    
     function _createContent(){
         var pageInfo = this.options.pageInfo;
         this.xOut = new Transitionable(0);
@@ -66,9 +72,9 @@ define(function(require, exports, module) {
             content: "X",
             properties: {
                 fontFamily: "arial",
-                fontWeight: "bold",
+                fontWeight: "normal",
                 cursor: "pointer",
-                fontSize: "20px",
+                fontSize: "30px",
                 color: "white"
             }
         });
@@ -84,16 +90,20 @@ define(function(require, exports, module) {
         
         closeOut.add(closeX);
         
-        header.on("click", function(){
+        header.on("click", function(e){
+            e.preventDefault(); e.stopPropagation(); 
+            
             this._eventOutput.emit('zoomOut');
+            return false;
         }.bind(this));
         
         
-        closeX.on("click", function(){
+        closeX.on("click", function(e){
+            e.preventDefault(); e.stopPropagation(); 
+            
             this.xOutEvents.emit("videoBlur");
+            
         }.bind(this));
-        
-        // console.log(this.xOutEvents);
         
         
         this.layout.content
@@ -105,11 +115,6 @@ define(function(require, exports, module) {
         
     }
     
-    function _setListeners(){
-        this.xOutEvents.on('videoBlur', function(){
-            this.videoBlur(this.currentPage);
-        }.bind(this));
-    }
 
     var page = {
         
@@ -139,7 +144,8 @@ define(function(require, exports, module) {
                     // content: "<iframe width='100%' height='100%' src="+ MusicData[i].src +" frameborder='0' allowfullscreen></iframe>",
                     properties : {
                         backgroundColor : "hsl(" + (i * 360 / 10) + ", 100%, 50%)",
-                        overflow : "hidden"
+                        overflow : "hidden",
+                        cursor: 'pointer'
                     }
                 });
                 
@@ -180,6 +186,7 @@ define(function(require, exports, module) {
     ContentView.prototype.videoBlur = function(x){
         
         var animation = { duration: 500, curve: 'easeIn' };
+        this.currentPage = null;
         
         this.xTransitions[x].set(this.originalPoition, animation);
         
@@ -200,10 +207,13 @@ define(function(require, exports, module) {
         
         var animation = { duration: 500, curve: 'easeIn' };
         
-        this.zS[x].set(1);
-        this.currentPage = x;
+        if(this.currentPage === x) return; 
+        
+        
         this.originalPoition = this.xTransitions[x].get();
         this.xTransitions[x].set(1, animation);
+        this.currentPage = x;
+        this.zS[x].set(1);
         
         this.sizeModifiers[x].set(
             [window.innerWidth, undefined], 
@@ -212,7 +222,8 @@ define(function(require, exports, module) {
                 
                 this.xOut.set(1, animation); 
                 
-            }.bind(this));
+            }.bind(this)
+        );
     };
 
     module.exports = ContentView;
