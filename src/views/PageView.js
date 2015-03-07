@@ -8,11 +8,17 @@ define(function(require, exports, module) {
     var StateModifier   = require('famous/modifiers/StateModifier');
     var ImageSurface    = require('famous/surfaces/ImageSurface');
     var Easing          = require('famous/transitions/Easing');
+    var GenericSync     = require('famous/inputs/GenericSync');
     var EventHandler    = require('famous/core/EventHandler');
+    var MouseSync       = require('famous/inputs/MouseSync');
+    var TouchSync       = require('famous/inputs/TouchSync');
     var Transform       = require('famous/core/Transform');
     var Modifier        = require('famous/core/Modifier');
     var Surface         = require('famous/core/Surface');
     var View            = require('famous/core/View');
+    
+    
+    GenericSync.register({'mouse': MouseSync, 'touch': TouchSync});
     
     var ContentView = require('views/ContentView');
     
@@ -26,7 +32,7 @@ define(function(require, exports, module) {
         this.currentPage = null;
         
         _renderPages.call(this);
-        _listeners.call(this);
+        _pageMove.call(this);
         
     }
 
@@ -45,10 +51,19 @@ define(function(require, exports, module) {
     };
 
     // Define your helper functions and prototype methods here
-
-    function _listeners(){
+    function _pageMove(){
+        var move = new GenericSync(
+            ['mouse', 'touch'],
+            { direction : GenericSync.DIRECTION_X }
+        );
+        console.log(this);
+        this.pipe(move);
         
+        move.on('update', function(data){
+           console.log('hi');
+        });
     }
+    
     
     function _renderPages(){
         var opts        = this.options, 
@@ -104,6 +119,18 @@ define(function(require, exports, module) {
                 transform: function(){
                     return Transform.translate(0,0,0);
                 }
+            });
+            
+            // Sync touch and mouse for moving pages side to side
+            var move = new GenericSync(
+                ['mouse', 'touch'],
+                { direction : GenericSync.DIRECTION_X }
+            );
+            
+            singlePage.pipe(move);
+            
+            move.on('update', function(data){
+               console.log('hi');
             });
             
             
@@ -220,7 +247,7 @@ define(function(require, exports, module) {
         this.otherSideModifiers[x]          //Show content Surface
             .transformFrom(Transform.translate(0,0,-1));
             
-        this.opacities[x].set(0, {duration: 200, curve: 'easeIn'}, 
+        this.opacities[x].set(0, {duration: 150, curve: 'easeIn'}, 
             function(){
             
             this.scales[x].set(0.2, trans);
