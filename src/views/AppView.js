@@ -8,7 +8,7 @@ define(function(require, exports, module) {
     var Surface         = require('famous/core/Surface');
     var Transform       = require('famous/core/Transform');
     var StateModifier   = require('famous/modifiers/StateModifier');
-    var FastClick       = require('famous/inputs/FastClick');
+    // var FastClick       = require('famous/inputs/FastClick');
     var EventHandler    = require('famous/core/EventHandler');
     var Modifier        = require('famous/core/Modifier');
     var Transitionable  = require('famous/transitions/Transitionable');

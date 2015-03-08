@@ -32,6 +32,7 @@ define(function(require, exports, module) {
         this.currentPage = null;
         
         _renderPages.call(this);
+        _setListeners.call(this);
         _pageMove.call(this);
         
     }
@@ -52,16 +53,33 @@ define(function(require, exports, module) {
 
     // Define your helper functions and prototype methods here
     function _pageMove(){
-        var move = new GenericSync(
-            ['mouse', 'touch'],
-            { direction : GenericSync.DIRECTION_X }
-        );
-        console.log(this);
-        this.pipe(move);
+        this.on('slide', function(data){
+            var moveDistance = data.delta / window.innerWidth;
+            
+            this.origins.forEach(function(origin, z){
+                var move = [origin.get()[0] + moveDistance, origin.get()[1]];
+                
+                origin.set(move);
+            });
         
-        move.on('update', function(data){
-           console.log('hi');
         });
+    }
+    
+    function _setListeners(x){
+        // var trans = { duration: 1000, curve: 'easeIn' };
+        
+        // this.otherSideModifiers[x]          //Show content Surface
+        //     .transformFrom(Transform.translate(0,0,-1));
+            
+        // this.opacities[x].set(0, {duration: 150, curve: 'easeIn'}, 
+        //     function(){
+            
+        //     this.scales[x].set(0.2, trans);
+        //     this.angles[x].set(this.options.defaultAngle, trans);
+            
+        // }.bind(this));
+        
+        // this.currentPage = null;
     }
     
     
@@ -126,13 +144,19 @@ define(function(require, exports, module) {
                 ['mouse', 'touch'],
                 { direction : GenericSync.DIRECTION_X }
             );
+            // move.addSync(['click']);
             
             singlePage.pipe(move);
             
             move.on('update', function(data){
-               console.log('hi');
-            });
+                console.log(data);
+                
+                this._eventOutput.emit('slide', data);
+            }.bind(this));
             
+            move.on('end', function(data){ 
+                if(Math.abs(data.position) < 1){ this.changePage(page); }
+            }.bind(this));
             
             // CREATE CONTENT SIDE 
             
@@ -153,8 +177,7 @@ define(function(require, exports, module) {
                 }
             });
             
-            singlePage.on('click', function(){ this.changePage(page) }.bind(this));
-            content.on('zoomOut', function(){ this.zoomOut(i); }.bind(this));
+            content.on('zoomOut', function(){ this.zoomOut(i); return false; }.bind(this));
             
             this.otherSideModifiers.push(otherSideModifier);
             this.pageModifiers.push(pageModifier);
@@ -186,6 +209,7 @@ define(function(require, exports, module) {
         
         
     }
+    
 
     PageView.prototype.toggle = function(){
         console.log('there');
@@ -208,11 +232,8 @@ define(function(require, exports, module) {
             newPage = page.id,
             x = newPage;
         
-        if(newPage === currentPage){
-            
-            this.zoomOut(x);
-            return;
-        }
+        
+        if(newPage === currentPage){ return; }
 
         //Math to center selected origin
         var moveOrigin = this.origins[x].get()[0] - 0.5;
