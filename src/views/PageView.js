@@ -100,7 +100,7 @@ define(function(require, exports, module) {
         
         
         opts.pageData.forEach(function(page, i){
-            var offset = new Transitionable([pageOffset, 0.7]),
+            var offset = new Transitionable([pageOffset, 0.8]),
                 angle = new Transitionable(opts.defaultAngle),
                 z = new Transitionable(0.122222),
                 opacity = new Transitionable(0),
@@ -149,7 +149,6 @@ define(function(require, exports, module) {
             singlePage.pipe(move);
             
             move.on('update', function(data){
-                console.log(data);
                 
                 this._eventOutput.emit('slide', data);
             }.bind(this));
@@ -264,6 +263,7 @@ define(function(require, exports, module) {
     
     PageView.prototype.zoomOut = function(x){
         var trans = { duration: 1000, curve: 'easeIn' };
+        
         
         this.otherSideModifiers[x]          //Show content Surface
             .transformFrom(Transform.translate(0,0,-1));
