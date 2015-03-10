@@ -56,50 +56,48 @@ define(function(require, exports, module) {
             headerSize: 60
         });
         
-        var header = new Surface({
-            content: pageInfo.title,
-            properties: {
-                backgroundColor: 'black',
-                textAlign: 'right',
-                color: 'white'
-            }
-        });
+        // Make the Header
+        var header = page.header.call(this);
         
+        //Make the content of the page 
         var content = page[pageInfo.title].call(this);
         
         var closeX = new Surface({
-            size: [20,20],
+            size: [50,50],
             content: "X",
             properties: {
-                fontFamily: "arial",
+                fontFamily: 'Special Elite',
                 fontWeight: "normal",
+                textAlign: "center",
+                lineHeight: "50px",
                 cursor: "pointer",
                 fontSize: "30px",
                 color: "white"
             }
         });
-        
+
         var closeXModifier = new Modifier({
             transform: Transform.translate(0,0,1),
             origin: [1,0]
         });
-        
+
         closeXModifier.opacityFrom(function(){ return this.xOut.get(); }.bind(this));
-        
         var closeOut = new RenderNode(closeXModifier);
-        
         closeOut.add(closeX);
         
-        header.on("click", function(e){
-            e.preventDefault(); e.stopPropagation(); 
-            
-            this._eventOutput.emit('zoomOut');
-            return false;
-        }.bind(this));
         
         
-        closeX.on("click", function(e){
-            e.preventDefault(); e.stopPropagation(); 
+        
+        
+        // var closePage = new RenderNode(closePageXModifier);
+        // closePage.add(closePageX);
+        
+        
+        
+
+        
+        
+        closeX.on("click", function(){
             
             this.xOutEvents.emit("videoBlur");
             
@@ -110,14 +108,86 @@ define(function(require, exports, module) {
             .add(content)
             .add(closeOut);
             
-        this.layout.header.add(header);
+        this.layout.header
+            .add(header);
+            // .add(closePage);
+            
         this.add(this.layout);
         
+        console.log(this.layout);
     }
     
 
     var page = {
         
+        header : function(){
+            var headerNode = new RenderNode();
+            
+            var headerBackground = new Surface({
+                // content: this.options.pageInfo.title,
+                properties: {
+                    backgroundColor: "black"
+                }
+            });
+            
+            var headerModifier = new Modifier({
+                transform: Transform.behind
+            });
+            
+            var title = new Surface({
+                content: this.options.pageInfo.title,
+                size: [200, 60],
+                properties: {
+                    fontFamily: 'Special Elite',
+                    textAlign: 'center',
+                    lineHeight: "60px",
+                    fontSize: "30px",
+                    color: 'white'
+                }
+            });
+            
+            var titleModifier = new Modifier({
+                origin: [0.5, 0.5]
+            });
+            
+            var closePageX = new Surface({
+                size: [50,60],
+                content: "X",
+                properties: {
+                    fontFamily: 'Special Elite',
+                    textAlign: "center",
+                    lineHeight: "60px",
+                    cursor: "pointer",
+                    fontSize: "30px",
+                    color: "white"
+                }
+            });
+            
+            var closePageXModifier = new Modifier({
+                origin: [1, 0.5]
+            });
+            
+            closePageX.on("click", function(){
+                
+                this._eventOutput.emit('zoomOut');
+    
+            }.bind(this));
+            
+            headerNode
+                .add(headerModifier)
+                .add(headerBackground);
+                
+            headerNode
+                .add(titleModifier)
+                .add(title);
+            
+            headerNode
+                .add(closePageXModifier)
+                .add(closePageX);
+            
+            
+            return headerNode; 
+        },
         about : function(){
             
         },

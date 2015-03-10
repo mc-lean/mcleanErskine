@@ -48,6 +48,7 @@ define(function(require, exports, module) {
         defaultAngle: 0.001,
         pagePosition: 0.04,
         pageOffset: 320,
+        yOffset: 0.8, 
         pageData: {}
     };
 
@@ -100,7 +101,7 @@ define(function(require, exports, module) {
         
         
         opts.pageData.forEach(function(page, i){
-            var offset = new Transitionable([pageOffset, 0.8]),
+            var offset = new Transitionable([pageOffset, opts.yOffset]),
                 angle = new Transitionable(opts.defaultAngle),
                 z = new Transitionable(0.122222),
                 opacity = new Transitionable(0),
@@ -239,7 +240,8 @@ define(function(require, exports, module) {
         
         // Move front and center
         this.origins.forEach(function(origin, z){
-            var move = [origin.get()[0] - moveOrigin, 0.5];
+            var yOrigin = z === x ? 0.5 : origin.get()[1],
+                move = [origin.get()[0] - moveOrigin, yOrigin];
             
             origin.set(move, { duration: 800, curve: 'easeInOut' });
         });
@@ -264,7 +266,7 @@ define(function(require, exports, module) {
     PageView.prototype.zoomOut = function(x){
         var trans = { duration: 1000, curve: 'easeIn' };
         
-        
+        this.origins[x].set([this.origins[x].get()[0], this.options.yOffset]);
         this.otherSideModifiers[x]          //Show content Surface
             .transformFrom(Transform.translate(0,0,-1));
             
