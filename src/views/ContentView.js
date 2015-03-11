@@ -144,7 +144,7 @@ define(function(require, exports, module) {
                     fontSize: "30px",
                     color: 'white'
                 }
-            });
+            }); 
             
             var titleModifier = new Modifier({
                 origin: [0.5, 0.5]

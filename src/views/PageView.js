@@ -109,7 +109,6 @@ define(function(require, exports, module) {
                 
             
             var singlePage = new Surface({
-                content: page.title,
                 classes: [page.title, 'double-sided'],
                 properties: {
                     backgroundColor: 'rgba(255, 255, 255, 0.30)',
