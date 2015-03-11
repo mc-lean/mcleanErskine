@@ -69,7 +69,7 @@ define(function(require, exports, module) {
     function _setListeners(x){
         // var trans = { duration: 1000, curve: 'easeIn' };
         
-        // this.otherSideModifiers[x]          //Show content Surface
+        // this.contentModifiers[x]          //Show content Surface
         //     .transformFrom(Transform.translate(0,0,-1));
             
         // this.opacities[x].set(0, {duration: 150, curve: 'easeIn'}, 
@@ -89,7 +89,7 @@ define(function(require, exports, module) {
             pageOffset  = opts.pagePosition,
             scaleTo     = window.innerWidth / 4 - 50;
         
-        this.otherSideModifiers = [];
+        this.contentModifiers = [];
         this.pageModifiers = [];
         this.pageRotations = [];
         this.opacities = [];
@@ -161,15 +161,15 @@ define(function(require, exports, module) {
             
             var content = new ContentView({ pageInfo : page });
 
-            var otherSideModifier = new Modifier();
+            var contentModifier = new Modifier();
             
-            otherSideModifier
+            contentModifier
                 .originFrom(function(){ return offset.get(); })
                 .alignFrom(function(){ return offset.get(); })
                 .transformFrom(Transform.translate(0,0,-1))
                 .opacityFrom(function(){ return opacity.get(); });
             
-            var otherSideScaleModifier = new Modifier({
+            var contentScaleModifier = new Modifier({
                 transform: function(){
                     var startScale = scale.get();
                     return Transform.scale(startScale, startScale, startScale);
@@ -178,7 +178,7 @@ define(function(require, exports, module) {
             
             content.on('zoomOut', function(){ this.zoomOut(i); return false; }.bind(this));
             
-            this.otherSideModifiers.push(otherSideModifier);
+            this.contentModifiers.push(contentModifier);
             this.pageModifiers.push(pageModifier);
             this.opacities.push(opacity);
             this.origins.push(offset);
@@ -196,8 +196,8 @@ define(function(require, exports, module) {
 
             // Add the other side that has the content
             this
-                .add(otherSideModifier)
-                .add(otherSideScaleModifier)
+                .add(contentModifier)
+                .add(contentScaleModifier)
                 .add(content);
             
             pageOffset += 0.3;
@@ -253,7 +253,7 @@ define(function(require, exports, module) {
             function(){
                 this.scales[x].set(1, trans);       //Finish the zoom in
                 
-                this.otherSideModifiers[x]          //Show content Surface
+                this.contentModifiers[x]          //Show content Surface
                     .transformFrom(Transform.translate(0,0,2));
                 this.opacities[x].set(1, { duration: 1000, curve: 'easeIn' });
             }.bind(this)
@@ -266,7 +266,7 @@ define(function(require, exports, module) {
         var trans = { duration: 1000, curve: 'easeIn' };
         
         this.origins[x].set([this.origins[x].get()[0], this.options.yOffset]);
-        this.otherSideModifiers[x]          //Show content Surface
+        this.contentModifiers[x]          //Show content Surface
             .transformFrom(Transform.translate(0,0,-1));
             
         this.opacities[x].set(0, {duration: 150, curve: 'easeIn'}, 
