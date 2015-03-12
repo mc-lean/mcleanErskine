@@ -110,11 +110,16 @@ define(function(require, exports, module) {
             
             var singlePage = new Surface({
                 classes: [page.title, 'double-sided'],
+                content: page.title, 
                 properties: {
                     backgroundColor: 'rgba(255, 255, 255, 0.30)',
                     border: "2px solid rgba(0, 0, 0, 0.23)",
-                    textAlign: 'right',
-                    cursor: 'pointer'
+                    fontFamily: 'special elite',
+                    textAlign: 'center',
+                    lineHeight: window.innerHeight + "px",
+                    cursor: 'pointer',
+                    fontSize: "90px",
+                    color: "black",
                 } 
             });
             
@@ -144,7 +149,6 @@ define(function(require, exports, module) {
                 ['mouse', 'touch'],
                 { direction : GenericSync.DIRECTION_X }
             );
-            // move.addSync(['click']);
             
             singlePage.pipe(move);
             
