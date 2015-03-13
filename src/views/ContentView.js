@@ -114,7 +114,6 @@ define(function(require, exports, module) {
             
         this.add(this.layout);
         
-        console.log(this.layout);
     }
     
 

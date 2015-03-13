@@ -4,19 +4,21 @@ var Page;
 define(function(require, exports, module) {
 
     // Import additional modules to be used in this view 
-    var Transitionable  = require('famous/transitions/Transitionable');
-    var StateModifier   = require('famous/modifiers/StateModifier');
-    var ImageSurface    = require('famous/surfaces/ImageSurface');
-    var Easing          = require('famous/transitions/Easing');
-    var GenericSync     = require('famous/inputs/GenericSync');
-    var EventHandler    = require('famous/core/EventHandler');
-    var MouseSync       = require('famous/inputs/MouseSync');
-    var TouchSync       = require('famous/inputs/TouchSync');
-    var Transform       = require('famous/core/Transform');
-    var Modifier        = require('famous/core/Modifier');
-    var Surface         = require('famous/core/Surface');
-    var View            = require('famous/core/View');
+    var SpringTransition    = require('famous/transitions/SpringTransition');
+    var Transitionable      = require('famous/transitions/Transitionable');
+    var StateModifier       = require('famous/modifiers/StateModifier');
+    var ImageSurface        = require('famous/surfaces/ImageSurface');
+    var Easing              = require('famous/transitions/Easing');
+    var GenericSync         = require('famous/inputs/GenericSync');
+    var EventHandler        = require('famous/core/EventHandler');
+    var MouseSync           = require('famous/inputs/MouseSync');
+    var TouchSync           = require('famous/inputs/TouchSync');
+    var Transform           = require('famous/core/Transform');
+    var Modifier            = require('famous/core/Modifier');
+    var Surface             = require('famous/core/Surface');
+    var View                = require('famous/core/View');
     
+    // Transitionable.registerMethod('spring', SpringTransition);
     
     GenericSync.register({'mouse': MouseSync, 'touch': TouchSync});
     
@@ -44,6 +46,7 @@ define(function(require, exports, module) {
     // Default options for PageView class
     PageView.DEFAULT_OPTIONS = {
         baseUrl: "https://s3.amazonaws.com/elasticbeanstalk-us-east-1-538093400772/mcleanErskine/",
+        spring: { method: 'spring', period: 1000, dampingRatio: 0.3},
         fadeInCurve: { duration: 1000, curve: Easing.outBack },
         defaultAngle: 0.001,
         pagePosition: 0.04,
@@ -61,26 +64,12 @@ define(function(require, exports, module) {
                 var move = [origin.get()[0] + moveDistance, origin.get()[1]];
                 
                 origin.set(move);
-            });
+            }.bind(this));
         
         });
     }
     
     function _setListeners(x){
-        // var trans = { duration: 1000, curve: 'easeIn' };
-        
-        // this.contentModifiers[x]          //Show content Surface
-        //     .transformFrom(Transform.translate(0,0,-1));
-            
-        // this.opacities[x].set(0, {duration: 150, curve: 'easeIn'}, 
-        //     function(){
-            
-        //     this.scales[x].set(0.2, trans);
-        //     this.angles[x].set(this.options.defaultAngle, trans);
-            
-        // }.bind(this));
-        
-        // this.currentPage = null;
     }
     
     
@@ -155,10 +144,13 @@ define(function(require, exports, module) {
             move.on('update', function(data){
                 
                 this._eventOutput.emit('slide', data);
+                
             }.bind(this));
             
             move.on('end', function(data){ 
+
                 if(Math.abs(data.position) < 1){ this.changePage(page); }
+
             }.bind(this));
             
             // CREATE CONTENT SIDE 
@@ -215,7 +207,6 @@ define(function(require, exports, module) {
     
 
     PageView.prototype.toggle = function(){
-        console.log('there');
         
          angle.set(1, { duration: 2000, curve: 'easeInOut' });
     };
