@@ -7,6 +7,7 @@ define(function(require, exports, module) {
     var SpringTransition    = require('famous/transitions/SpringTransition');
     var Transitionable      = require('famous/transitions/Transitionable');
     var StateModifier       = require('famous/modifiers/StateModifier');
+    var RenderController    = require("famous/views/RenderController");
     var ImageSurface        = require('famous/surfaces/ImageSurface');
     var Easing              = require('famous/transitions/Easing');
     var GenericSync         = require('famous/inputs/GenericSync');
@@ -57,6 +58,7 @@ define(function(require, exports, module) {
 
     // Define your helper functions and prototype methods here
     function _pageMove(){
+        
         this.on('slide', function(data){
             var moveDistance = data.delta / window.innerWidth;
             
@@ -64,8 +66,7 @@ define(function(require, exports, module) {
                 var move = [origin.get()[0] + moveDistance, origin.get()[1]];
                 
                 origin.set(move);
-            }.bind(this));
-        
+            });
         });
     }
     
@@ -78,9 +79,11 @@ define(function(require, exports, module) {
             pageOffset  = opts.pagePosition,
             scaleTo     = window.innerWidth / 4 - 50;
         
+        this.renderController = new RenderController(),
         this.contentModifiers = [];
         this.pageModifiers = [];
         this.pageRotations = [];
+        this.contentPages = [];
         this.opacities = [];
         this.origins = [];
         this.angles = [];
@@ -93,7 +96,7 @@ define(function(require, exports, module) {
             var offset = new Transitionable([pageOffset, opts.yOffset]),
                 angle = new Transitionable(opts.defaultAngle),
                 z = new Transitionable(0.122222),
-                opacity = new Transitionable(0),
+                opacity = new Transitionable(1),
                 scale = new Transitionable(0);
                 
             
@@ -107,7 +110,7 @@ define(function(require, exports, module) {
                     textAlign: 'center',
                     lineHeight: window.innerHeight + "px",
                     cursor: 'pointer',
-                    fontSize: "90px",
+                    fontSize: "5em",
                     color: "black",
                 } 
             });
@@ -149,7 +152,9 @@ define(function(require, exports, module) {
             
             move.on('end', function(data){ 
 
-                if(Math.abs(data.position) < 1){ this.changePage(page); }
+                if(Math.abs(data.position) < 1){ 
+                    this.changePage(page); 
+                }
 
             }.bind(this));
             
@@ -157,12 +162,13 @@ define(function(require, exports, module) {
             
             var content = new ContentView({ pageInfo : page });
 
-            var contentModifier = new Modifier();
+            
+            var contentModifier = new Modifier(this.visible = false);
             
             contentModifier
                 .originFrom(function(){ return offset.get(); })
                 .alignFrom(function(){ return offset.get(); })
-                .transformFrom(Transform.translate(0,0,-1))
+                .transformFrom(Transform.translate(0,0,-2))
                 .opacityFrom(function(){ return opacity.get(); });
             
             var contentScaleModifier = new Modifier({
@@ -172,10 +178,11 @@ define(function(require, exports, module) {
                 }
             });
             
-            content.on('zoomOut', function(){ this.zoomOut(i); return false; }.bind(this));
+            content.on('zoomOut', function(){ this.zoomOut(i); }.bind(this));
             
             this.contentModifiers.push(contentModifier);
             this.pageModifiers.push(pageModifier);
+            this.contentPages.push(content);
             this.opacities.push(opacity);
             this.origins.push(offset);
             this.angles.push(angle);
@@ -194,7 +201,7 @@ define(function(require, exports, module) {
             this
                 .add(contentModifier)
                 .add(contentScaleModifier)
-                .add(content);
+                .add(this.renderController);
             
             pageOffset += 0.3;
             
@@ -244,10 +251,10 @@ define(function(require, exports, module) {
         this.scales[x].set(0.5, trans);         //move Scale up 
             
         this.angles[x].set(         //Spin the page
-            3.14, trans,
+            Math.PI, trans,
             function(){
                 this.scales[x].set(1, trans);       //Finish the zoom in
-                
+                this.renderController.show(this.contentPages[x]);
                 this.contentModifiers[x]          //Show content Surface
                     .transformFrom(Transform.translate(0,0,2));
                 this.opacities[x].set(1, { duration: 1000, curve: 'easeIn' });

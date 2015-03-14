@@ -45,12 +45,18 @@ define(function(require, exports, module) {
         this.xOutEvents.on('videoBlur', function(){
             this.videoBlur(this.currentPage);
         }.bind(this));
+        
+        this.on('videoFocus', function(i){
+
+            this.videoFocus(i); 
+            
+        }.bind(this));
     }
     
     function _createContent(){
         var pageInfo = this.options.pageInfo;
-        this.xOut = new Transitionable(0);
         this.xOutEvents = new EventHandler();
+        this.xOut = new Transitionable(0);
         
         this.layout = new HeaderFooterLayout({
             headerSize: 60
@@ -85,18 +91,6 @@ define(function(require, exports, module) {
         var closeOut = new RenderNode(closeXModifier);
         closeOut.add(closeX);
         
-        
-        
-        
-        
-        // var closePage = new RenderNode(closePageXModifier);
-        // closePage.add(closePageX);
-        
-        
-        
-
-        
-        
         closeX.on("click", function(){
             
             this.xOutEvents.emit("videoBlur");
@@ -110,7 +104,6 @@ define(function(require, exports, module) {
             
         this.layout.header
             .add(header);
-            // .add(closePage);
             
         this.add(this.layout);
         
@@ -123,7 +116,6 @@ define(function(require, exports, module) {
             var headerNode = new RenderNode();
             
             var headerBackground = new Surface({
-                // content: this.options.pageInfo.title,
                 properties: {
                     backgroundColor: "black"
                 }
@@ -228,7 +220,11 @@ define(function(require, exports, module) {
                     .add(videoSurfaceModifier)
                     .add(videoSurface);
                 
-                videoSurface.on("click", function(){ this.videoFocus(i); }.bind(this));
+                videoSurface.on("click", function(){ 
+                    
+                    this._eventOutput.emit('videoFocus', i); 
+                    
+                }.bind(this));
                 
                 this.videoSurfaceModifiers.push(videoSurfaceModifier);
                 this.sizeModifiers.push(sizeModifier);
@@ -254,6 +250,7 @@ define(function(require, exports, module) {
     
     ContentView.prototype.videoBlur = function(x){
         
+        
         var animation = { duration: 500, curve: 'easeIn' };
         this.currentPage = null;
         
@@ -274,6 +271,7 @@ define(function(require, exports, module) {
     
     ContentView.prototype.videoFocus = function(x){
         
+
         var animation = { duration: 500, curve: 'easeIn' };
         
         if(this.currentPage === x) return; 

@@ -4,14 +4,14 @@
 define(function(require, exports, module) {
 
     // Import additional modules to be used in this view 
-    var View            = require('famous/core/View');
-    var Surface         = require('famous/core/Surface');
-    var Transform       = require('famous/core/Transform');
-    var StateModifier   = require('famous/modifiers/StateModifier');
-    // var FastClick       = require('famous/inputs/FastClick');
-    var EventHandler    = require('famous/core/EventHandler');
-    var Modifier        = require('famous/core/Modifier');
     var Transitionable  = require('famous/transitions/Transitionable');
+    var StateModifier   = require('famous/modifiers/StateModifier');
+    var EventHandler    = require('famous/core/EventHandler');
+    var FastClick       = require('famous/inputs/FastClick');
+    var Transform       = require('famous/core/Transform');
+    var Modifier        = require('famous/core/Modifier');
+    var Surface         = require('famous/core/Surface');
+    var View            = require('famous/core/View');
 
     // Import classes 
     // var MenuView = require('views/MenuView');
