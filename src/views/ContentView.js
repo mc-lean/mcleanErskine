@@ -158,10 +158,12 @@ define(function(require, exports, module) {
                 origin: [1, 0.5]
             });
             
-            closePageX.on("click", function(){
+            closePageX.on("click", function(e){
+                e.preventDefault(); e.stopPropagation();
                 
                 this._eventOutput.emit('zoomOut');
-    
+
+                return false;
             }.bind(this));
             
             headerNode
