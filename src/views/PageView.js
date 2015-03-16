@@ -14,6 +14,7 @@ define(function(require, exports, module) {
     var EventHandler        = require('famous/core/EventHandler');
     var MouseSync           = require('famous/inputs/MouseSync');
     var TouchSync           = require('famous/inputs/TouchSync');
+    var RenderNode          = require('famous/core/RenderNode');
     var Transform           = require('famous/core/Transform');
     var Modifier            = require('famous/core/Modifier');
     var Surface             = require('famous/core/Surface');
@@ -79,7 +80,7 @@ define(function(require, exports, module) {
             pageOffset  = opts.pagePosition,
             scaleTo     = window.innerWidth / 4 - 50;
         
-        this.renderController = new RenderController(),
+        this.renderControllers = [];
         this.contentModifiers = [];
         this.pageModifiers = [];
         this.pageRotations = [];
@@ -95,8 +96,10 @@ define(function(require, exports, module) {
         opts.pageData.forEach(function(page, i){
             var offset = new Transitionable([pageOffset, opts.yOffset]),
                 angle = new Transitionable(opts.defaultAngle),
+                renderController = new RenderController(),
                 z = new Transitionable(0.122222),
                 opacity = new Transitionable(1),
+                contentNode = new RenderNode(),
                 scale = new Transitionable(0);
                 
             
@@ -161,9 +164,9 @@ define(function(require, exports, module) {
             // CREATE CONTENT SIDE 
             
             var content = new ContentView({ pageInfo : page });
-
+        
             
-            var contentModifier = new Modifier(this.visible = false);
+            var contentModifier = new Modifier();
             
             contentModifier
                 .originFrom(function(){ return offset.get(); })
@@ -180,6 +183,7 @@ define(function(require, exports, module) {
             
             content.on('zoomOut', function(){ this.zoomOut(i); }.bind(this));
             
+            this.renderControllers.push(renderController);
             this.contentModifiers.push(contentModifier);
             this.pageModifiers.push(pageModifier);
             this.contentPages.push(content);
@@ -198,10 +202,13 @@ define(function(require, exports, module) {
 
 
             // Add the other side that has the content
+            //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            //Change to Render Node to add modifiers to the content
             this
                 .add(contentModifier)
                 .add(contentScaleModifier)
-                .add(this.renderController);
+                .add(renderController);
             
             pageOffset += 0.3;
             
@@ -254,7 +261,7 @@ define(function(require, exports, module) {
             Math.PI, trans,
             function(){
                 this.scales[x].set(1, trans);       //Finish the zoom in
-                this.renderController.show(this.contentPages[x]);
+                this.renderControllers[x].show(this.contentPages[x]);
                 this.contentModifiers[x]          //Show content Surface
                     .transformFrom(Transform.translate(0,0,2));
                 this.opacities[x].set(1, { duration: 1000, curve: 'easeIn' });
@@ -273,7 +280,7 @@ define(function(require, exports, module) {
             
         this.opacities[x].set(0, {duration: 150, curve: 'easeIn'}, 
             function(){
-            
+            this.renderControllers[x].hide(this.contentPages[x]);
             this.scales[x].set(0.2, trans);
             this.angles[x].set(this.options.defaultAngle, trans);
             
