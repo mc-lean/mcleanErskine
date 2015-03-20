@@ -167,7 +167,7 @@ define(function(require, exports, module) {
             }.bind(this));
             
             move.on('end', function(data){ 
-                console.log(data);
+                
                 if(Math.abs(data.position) < 1){ 
                     this.changePage(page); 
                 }
@@ -282,9 +282,13 @@ define(function(require, exports, module) {
                 this.contentModifiers[x]          
                     .transformFrom(Transform.translate(0,0,2));
                     
-                this.opacities[x].set(1, { duration: 1000, curve: 'easeIn' }, function(){
-                    this._eventOutput.emit('ready');
-                }.bind(this.contentPages[x]));
+                this.opacities[x].set(1, { duration: 1000, curve: 'easeIn' }, 
+                    function(){
+                        
+                        // Emit ready so the current page can perform its events
+                        this._eventOutput.emit('ready');
+                    }.bind(this.contentPages[x])
+                );
 
                 
                 this.transitioning = !this.transitioning;

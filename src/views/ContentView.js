@@ -51,7 +51,7 @@ define(function(require, exports, module) {
     function _setListeners(){
         this.xOutEvents.on('videoBlur', function(x){
             
-            if(!x) return; 
+            if(!x) return;      // If x (currentPage) is null return
             
             var animation = { duration: 500, curve: 'easeIn' };
             this.currentPage = null;
@@ -71,11 +71,10 @@ define(function(require, exports, module) {
             this.xOut.set(0, animation); 
         }.bind(this));
         
-        this.on('ready', function(){ 
-            this.pageReady = true;
-            console.log('ready'); 
-            
-        });
+        
+        // !!!!!!!!!!!!!!Prevent bubbling !!!!!!!!!!!!!!!!!
+        // let the current page know that it is showing and
+        this.on('ready', function(){ this.pageReady = true; });
         
         this.on('videoFocus', function(x){
             
