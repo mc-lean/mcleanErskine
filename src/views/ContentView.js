@@ -30,6 +30,8 @@ define(function(require, exports, module) {
         
         this.currentPage = null;
         this.originalPoition = null;
+        this.pageReady = false;
+
         
         _createContent.call(this);
         
@@ -42,18 +44,62 @@ define(function(require, exports, module) {
 
     // Default options for ContentView class
     ContentView.DEFAULT_OPTIONS = {
-        videoSurfaceSize: window.innerWidth / MusicData.length,
+        videoSurfaceSize: Math.ceil(window.innerWidth / MusicData.length),
         pageInfo: {}
     };
     
     function _setListeners(){
-        this.xOutEvents.on('videoBlur', function(){
-            this.videoBlur(this.currentPage);
+        this.xOutEvents.on('videoBlur', function(x){
+            
+            if(!x) return; 
+            
+            var animation = { duration: 500, curve: 'easeIn' };
+            this.currentPage = null;
+            
+            this.xTransitions[x].set(this.originalPoition, animation);
+            
+            this.sizeModifiers[x].set(
+                [this.options.videoSurfaceSize, undefined], 
+                animation, 
+                function(){ 
+                    
+                    this.zS[x].set(0); 
+                    
+                }.bind(this)
+            );
+            
+            this.xOut.set(0, animation); 
         }.bind(this));
         
-        this.on('videoFocus', function(i){
-
-            this.videoFocus(i); 
+        this.on('ready', function(){ 
+            this.pageReady = true;
+            console.log('ready'); 
+            
+        });
+        
+        this.on('videoFocus', function(x){
+            
+            if(!this.pageReady) return;
+            
+            var animation = { duration: 500, curve: 'easeIn' };
+        
+            if(this.currentPage === x) return; 
+            
+            
+            this.originalPoition = this.xTransitions[x].get();
+            this.xTransitions[x].set(1, animation);
+            this.currentPage = x;
+            this.zS[x].set(1);
+            
+            this.sizeModifiers[x].set(
+                [window.innerWidth, undefined], 
+                animation, 
+                function(){ 
+                    
+                    this.xOut.set(1, animation); 
+                    
+                }.bind(this)
+            );
             
         }.bind(this));
     }
@@ -99,7 +145,7 @@ define(function(require, exports, module) {
         
         closeX.on("click", function(){
             
-            this.xOutEvents.emit("videoBlur");
+            this.xOutEvents.emit("videoBlur", this.currentPage);
             
         }.bind(this));
         
@@ -169,7 +215,9 @@ define(function(require, exports, module) {
             closePageX.on("click", function(e){
                 e.preventDefault(); e.stopPropagation();
                 
+                this.xOutEvents.emit('videoBlur', this.currentPage);
                 this._eventOutput.emit('zoomOut');
+                this.pageReady = false; 
 
                 return false;
             }.bind(this));

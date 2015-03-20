@@ -175,6 +175,9 @@ define(function(require, exports, module) {
             }.bind(this));
             
             
+            move.on('click', function(){ console.log('hello'); });
+            
+            
             
             // CREATE CONTENT SIDE 
             var content = new ContentView({ pageInfo : page });
@@ -279,7 +282,9 @@ define(function(require, exports, module) {
                 this.contentModifiers[x]          
                     .transformFrom(Transform.translate(0,0,2));
                     
-                this.opacities[x].set(1, { duration: 1000, curve: 'easeIn' });
+                this.opacities[x].set(1, { duration: 1000, curve: 'easeIn' }, function(){
+                    this._eventOutput.emit('ready');
+                }.bind(this.contentPages[x]));
 
                 
                 this.transitioning = !this.transitioning;
