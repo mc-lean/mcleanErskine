@@ -12,6 +12,7 @@ define(function(require, exports, module) {
     var EventHandler        = require('famous/core/EventHandler');
     var RenderNode          = require('famous/core/RenderNode');
     var MouseSync           = require('famous/inputs/MouseSync');
+    var Scrollview          = require("famous/views/Scrollview");
     var TouchSync           = require('famous/inputs/TouchSync');
     var Transform           = require('famous/core/Transform');
     var Modifier            = require('famous/core/Modifier');
@@ -238,6 +239,55 @@ define(function(require, exports, module) {
         },
         about : function(){
             
+            
+            var aboutSurface = new RenderNode(),
+                opts = this.options,
+                surfaces = [];
+                
+            var body = new Surface({
+                size: [undefined, undefined],
+                properties: {
+                    backgroundColor: 'gray',
+                }
+            });
+            
+            var scrollview = new Scrollview();
+            
+            scrollview.sequenceFrom(surfaces);
+    
+            for (i = 0; i < 1000; i++) {
+                
+                
+                var surface = new Surface({
+                    size: [undefined, 90],
+                    content: "surface " + (i + 1),
+                    properties: {
+                        color: "#ffffff",
+                        backgroundColor : "hsl(" + (i * 360 / 50) + ", 100%, 50%)",
+                        border: "5px black solid",
+                        textAlign: 'center',
+                        lineHeight: "50px",
+                        cursor: 'default'
+                    }
+                });
+    
+                surface.pipe(scrollview);
+                var mod = new Modifier({
+                    transform: Transform.translate(0,0,-1)
+                });
+ 
+                var node = new RenderNode(mod);
+                node.add(surface);
+                surfaces.push(node);
+            }
+            
+            
+            
+            aboutSurface
+                .add(scrollview)
+                .add(body);
+            
+            return aboutSurface; 
         },
         music : function(){
             
@@ -273,6 +323,7 @@ define(function(require, exports, module) {
                     .transformFrom( function(){ return Transform.translate(xTransition.get(), 0, z.get()) })
                     .sizeFrom( function(){ return sizeModifier.get() });
                 
+                // add new video surfaces to the render node
                 surface
                     .add(videoSurfaceModifier)
                     .add(videoSurface);

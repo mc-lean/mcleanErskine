@@ -24,6 +24,7 @@ define(function(require, exports, module) {
         View.apply(this, arguments);
 
         _createPageView.call(this);
+        _createLogo.call(this);
     }
 
     // Establishes prototype chain for AppView class to inherit from View
@@ -35,15 +36,30 @@ define(function(require, exports, module) {
 
     // Define your helper functions and prototype methods here
     function _createPageView(){
-        this.pageView = new PageView({ pageData : PageData });
+        var pageView = new PageView({ pageData : PageData });
 
-        this.add(this.pageView);
+        this.add(pageView);
     }
     
-
-    function _setListeners(){
-
+    function _createLogo() {
+        var logoView = new Surface({
+            content: "me",
+            size: [110,60],
+            properties: {
+                fontFamily: 'Special Elite',
+                textAlign: 'center',
+                fontSize: '30px',
+                color: 'black'
+            }
+        });
+        
+        var logoModifier = new StateModifier({
+            origin: [1,1]
+        });
+        
+        this.add(logoModifier).add(logoView);
     }
+
 
     module.exports = AppView;
 });
