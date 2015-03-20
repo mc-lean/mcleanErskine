@@ -34,6 +34,7 @@ define(function(require, exports, module) {
         View.apply(this, arguments);
         
         this.currentPage = null;
+        this.transitioning = false; 
         
         _renderPages.call(this);
         _setListeners.call(this);
@@ -50,6 +51,16 @@ define(function(require, exports, module) {
         baseUrl: "https://s3.amazonaws.com/elasticbeanstalk-us-east-1-538093400772/mcleanErskine/",
         spring: { method: 'spring', period: 1000, dampingRatio: 0.3},
         fadeInCurve: { duration: 1000, curve: Easing.outBack },
+        contentTransition: {
+            inTransition: {
+                curve: Easing.easeOut,
+                duration: 500
+            },
+            outTransition: {
+                curve: Easing.easeIn,
+                duration: 100
+            }
+        },
         defaultAngle: 0.001,
         pagePosition: 0.04,
         pageOffset: 320,
@@ -80,7 +91,7 @@ define(function(require, exports, module) {
             pageOffset  = opts.pagePosition,
             scaleTo     = window.innerWidth / 4 - 50;
         
-        this.renderControllers = [];
+        
         this.contentModifiers = [];
         this.pageModifiers = [];
         this.pageRotations = [];
@@ -90,15 +101,17 @@ define(function(require, exports, module) {
         this.angles = [];
         this.scales = [];
         this.align  = [];
+        this.pages = [];
         this.z = [];
         
         
         opts.pageData.forEach(function(page, i){
+            
+            
             var offset = new Transitionable([pageOffset, opts.yOffset]),
                 angle = new Transitionable(opts.defaultAngle),
-                renderController = new RenderController(),
                 z = new Transitionable(0.122222),
-                opacity = new Transitionable(1),
+                opacity = new Transitionable(0),
                 contentNode = new RenderNode(),
                 scale = new Transitionable(0);
                 
@@ -154,20 +167,19 @@ define(function(require, exports, module) {
             }.bind(this));
             
             move.on('end', function(data){ 
-
+                console.log(data);
                 if(Math.abs(data.position) < 1){ 
                     this.changePage(page); 
                 }
 
             }.bind(this));
             
-            // CREATE CONTENT SIDE 
             
+            
+            // CREATE CONTENT SIDE 
             var content = new ContentView({ pageInfo : page });
-        
             
             var contentModifier = new Modifier();
-            
             contentModifier
                 .originFrom(function(){ return offset.get(); })
                 .alignFrom(function(){ return offset.get(); })
@@ -181,13 +193,17 @@ define(function(require, exports, module) {
                 }
             });
             
+            // contentRenderController
+            //     .inOriginFrom(function(){ return offset.get(); });
+            
             content.on('zoomOut', function(){ this.zoomOut(i); }.bind(this));
             
-            this.renderControllers.push(renderController);
+
             this.contentModifiers.push(contentModifier);
             this.pageModifiers.push(pageModifier);
             this.contentPages.push(content);
             this.opacities.push(opacity);
+            this.pages.push(singlePage);
             this.origins.push(offset);
             this.angles.push(angle);
             this.scales.push(scale);
@@ -199,16 +215,12 @@ define(function(require, exports, module) {
                 .add(pageModifier)
                 .add(scaleModifier)
                 .add(singlePage);
-
-
-            // Add the other side that has the content
-            //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-            //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-            //Change to Render Node to add modifiers to the content
+                
+            
             this
                 .add(contentModifier)
                 .add(contentScaleModifier)
-                .add(renderController);
+                .add(content);
             
             pageOffset += 0.3;
             
@@ -240,10 +252,11 @@ define(function(require, exports, module) {
             newPage = page.id,
             x = newPage;
         
+        if(newPage === currentPage || this.transitioning){  return; }
         
-        if(newPage === currentPage){ return; }
+        this.transitioning = true;
 
-        //Math to center selected origin
+        //Math to center selected page via origin
         var moveOrigin = this.origins[x].get()[0] - 0.5;
         
         // Move front and center
@@ -260,11 +273,16 @@ define(function(require, exports, module) {
         this.angles[x].set(         //Spin the page
             Math.PI, trans,
             function(){
+                
                 this.scales[x].set(1, trans);       //Finish the zoom in
-                this.renderControllers[x].show(this.contentPages[x]);
-                this.contentModifiers[x]          //Show content Surface
+                
+                this.contentModifiers[x]          
                     .transformFrom(Transform.translate(0,0,2));
+                    
                 this.opacities[x].set(1, { duration: 1000, curve: 'easeIn' });
+
+                
+                this.transitioning = !this.transitioning;
             }.bind(this)
         );
 
@@ -274,15 +292,24 @@ define(function(require, exports, module) {
     PageView.prototype.zoomOut = function(x){
         var trans = { duration: 1000, curve: 'easeIn' };
         
+        if(this.transitioning){ return; }
+        
+        this.transitioning = true;
+        
         this.origins[x].set([this.origins[x].get()[0], this.options.yOffset]);
+        
         this.contentModifiers[x]          //Show content Surface
             .transformFrom(Transform.translate(0,0,-1));
             
         this.opacities[x].set(0, {duration: 150, curve: 'easeIn'}, 
             function(){
-            this.renderControllers[x].hide(this.contentPages[x]);
+
             this.scales[x].set(0.2, trans);
-            this.angles[x].set(this.options.defaultAngle, trans);
+            this.angles[x].set(this.options.defaultAngle, trans, function(){ 
+                
+                this.transitioning = !this.transitioning;
+                
+            }.bind(this));
             
         }.bind(this));
         

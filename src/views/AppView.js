@@ -24,8 +24,6 @@ define(function(require, exports, module) {
         View.apply(this, arguments);
 
         _createPageView.call(this);
-        // _createMenuView.call(this);
-        // _setListeners.call(this);
     }
 
     // Establishes prototype chain for AppView class to inherit from View
@@ -42,16 +40,9 @@ define(function(require, exports, module) {
         this.add(this.pageView);
     }
     
-    function _createMenuView(){
-        this.menuView = new MenuView({ boxData : BoxData });
-        this.menuModifier = new StateModifier();
-        
-        this.add(this.menuModifier).add(this.menuView);
-    }
+
     function _setListeners(){
-        this.menuView.on('changePage', function(event){
-            this.pageView.changePage(event);
-        }.bind(this));
+
     }
 
     module.exports = AppView;

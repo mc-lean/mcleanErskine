@@ -8,14 +8,19 @@ define(function(require, exports, module) {
     var HeaderFooterLayout  = require("famous/views/HeaderFooterLayout");
     var SequentialLayout    = require("famous/views/SequentialLayout");
     var Easing              = require('famous/transitions/Easing');
+    var GenericSync         = require('famous/inputs/GenericSync');
     var EventHandler        = require('famous/core/EventHandler');
     var RenderNode          = require('famous/core/RenderNode');
+    var MouseSync           = require('famous/inputs/MouseSync');
+    var TouchSync           = require('famous/inputs/TouchSync');
     var Transform           = require('famous/core/Transform');
     var Modifier            = require('famous/core/Modifier');
     var Surface             = require('famous/core/Surface');
     var View                = require('famous/core/View');
     
     var MusicData = require('data/MusicData');
+    
+    GenericSync.register({'mouse': MouseSync, 'touch': TouchSync});
 
     // Constructor function for our ContentView class
     function ContentView() { 
@@ -91,6 +96,7 @@ define(function(require, exports, module) {
         var closeOut = new RenderNode(closeXModifier);
         closeOut.add(closeX);
         
+        
         closeX.on("click", function(){
             
             this.xOutEvents.emit("videoBlur");
@@ -155,7 +161,9 @@ define(function(require, exports, module) {
             });
             
             var closePageXModifier = new Modifier({
-                origin: [1, 0.5]
+                origin: [1, 0.5],
+                transform: Transform.inFront
+                
             });
             
             closePageX.on("click", function(e){
