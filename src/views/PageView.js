@@ -83,9 +83,8 @@ define(function(require, exports, module) {
     }
     
     function _setListeners(){
-        this.on('good morning', function(){ 
+        this.on('goodMorning', function(){ 
             
-            console.log('good morning');
             this.scales.forEach(function(scale, i) {
                scale.set(0.2, {duration: 2000, curve: Easing.outBack});
             });

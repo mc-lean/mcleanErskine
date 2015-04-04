@@ -6,9 +6,11 @@ define(function(require, exports, module) {
     // Import additional modules to be used in this view 
     var Transitionable  = require('famous/transitions/Transitionable');
     var StateModifier   = require('famous/modifiers/StateModifier');
+    var RenderCtlr      = require("famous/views/RenderController");
     var Easing          = require('famous/transitions/Easing');
     var EventHandler    = require('famous/core/EventHandler');
     var FastClick       = require('famous/inputs/FastClick');
+    var Timer           = require('famous/utilities/Timer');
     var RenderNode      = require('famous/core/RenderNode');
     var Transform       = require('famous/core/Transform');
     var Modifier        = require('famous/core/Modifier');
@@ -46,23 +48,27 @@ define(function(require, exports, module) {
     }
     
     function _addListeners(){
+        // Set backgound image for the body after loading the intro
+        document.body.style.backgroundImage = "url('https://s3.amazonaws.com/elasticbeanstalk-us-east-1-538093400772/mcleanErskine/ggBridgeBackground.jpg')";
         
-        var transition = { durration: 200, curve: 'easeIn' },
+        var transition = { durration: 300, curve: 'easeIn' },
             move = 60;
+            
         this.on('slide', function(){
-            console.log('move');
             
             this.mcleanMove.set(-move, transition);
             this.erskineMove.set(
                 move, transition, 
                 function() { 
-                    this.logoOpacity.set(
-                        0, transition,
-                        function() {
-                            
-                            this._eventOutput.emit('good morning');
-                        }.bind(this.pageView)
-                    );
+                    
+                    Timer.setTimeout(function(){
+                                
+                        this.pageView._eventOutput.emit('goodMorning'); 
+                        this.renderCtlr.hide();
+                        
+                    }.bind(this), 
+                    300);
+                    
                 }.bind(this)
             );
         }.bind(this));
@@ -70,11 +76,20 @@ define(function(require, exports, module) {
     
     function _createNewLogo(){
         
-                
         this.erskineMove = new Transitionable(0);
-        this.logoOpacity = new Transitionable(1);
         this.mcleanMove = new Transitionable(0);
         this.width = new Transitionable(110);
+        this.renderCtlr = new RenderCtlr({
+            inTransition: {
+                curve: Easing.easeOut,
+                duration: 1000
+            },
+            outTransition: {
+                curve: Easing.easeIn,
+                duration: 1000
+            },
+            overlap: false
+        });
         
         var logoSurface = new Surface({
             properties: {
@@ -82,13 +97,13 @@ define(function(require, exports, module) {
             }
         });
         
-        var logoSurfaceMod = new Modifier();
+        this.logoSurfaceMod = new Modifier();
         
-        logoSurfaceMod
-            .opacityFrom(function(){ return this.logoOpacity.get(); }.bind(this))
+        // Move it forward in Z index
+        this.logoSurfaceMod
             .transformFrom(function(){ return Transform.translate(0, 0, 1); });
         
-        var logoNode = new RenderNode(logoSurfaceMod);
+        var logoNode = new RenderNode(this.logoSurfaceMod);
         logoNode.add(logoSurface);
     
         
@@ -105,13 +120,14 @@ define(function(require, exports, module) {
             properties: style,
         });
         
-        var mcleanModifier = new Modifier();
+        var mcleanModifier = new Modifier({
+            origin : [0.5,0.5],
+            size : [110, 60],
+            transform : function(){
+                return Transform.translate(this.mcleanMove.get(), 0, 0); 
+            }.bind(this)
+        });
         
-        mcleanModifier
-            .transformFrom(function(){ return Transform.translate(this.mcleanMove.get(), 0, 0); }.bind(this))
-            .sizeFrom(function(){ return [this.width.get(), 60]; }.bind(this))
-            .originFrom( [0.5,0.5] );
-            
         var erskine = new Surface({
             content: 'erskine',
             properties: style,
@@ -119,14 +135,12 @@ define(function(require, exports, module) {
         
         var erskineModifier = new Modifier({
             origin : [0.5,0.5],
+            size : [120, 60],
+            transform : function(){
+                return Transform.translate(this.erskineMove.get(), 0, 0); 
+            }.bind(this)
         });
         
-        erskineModifier
-            .transformFrom(function(){ return Transform.translate(this.erskineMove.get(), 0, 0); }.bind(this))
-            .sizeFrom(function(){ return [this.width.get() + 10, 60]; }.bind(this));
-        
-
-        this._eventOutput.emit('slide');
         
         
         logoNode
@@ -136,8 +150,20 @@ define(function(require, exports, module) {
         logoNode
             .add(erskineModifier)
             .add(erskine);
+            
+        this.renderCtlr
+            .inOpacityFrom(function(){ return 1; }.bind(this) ); 
         
-        this.add(logoNode);
+        this.renderCtlr.show(logoNode);
+        
+        this.add(this.renderCtlr);
+        
+        
+        Timer.setTimeout(function() {
+            
+            this._eventOutput.emit('slide');
+        }.bind(this), 
+        500);
     }
     
     function _createLogo() {
