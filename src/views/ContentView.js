@@ -10,10 +10,10 @@ define(function(require, exports, module) {
     var Easing              = require('famous/transitions/Easing');
     var GenericSync         = require('famous/inputs/GenericSync');
     var EventHandler        = require('famous/core/EventHandler');
-    var RenderNode          = require('famous/core/RenderNode');
     var MouseSync           = require('famous/inputs/MouseSync');
     var Scrollview          = require("famous/views/Scrollview");
     var TouchSync           = require('famous/inputs/TouchSync');
+    var RenderNode          = require('famous/core/RenderNode');
     var Transform           = require('famous/core/Transform');
     var Modifier            = require('famous/core/Modifier');
     var Surface             = require('famous/core/Surface');
@@ -244,10 +244,19 @@ define(function(require, exports, module) {
                 opts = this.options,
                 surfaces = [];
                 
+                
+            var aboutSummary = "I am a web developer / front-end engineer living in \
+            San Francisco.  Though I have built many systems from front to the back my \
+            passion lays in front-end development. I love good design, and working with \
+            good designers.  I absolutely love building good products and spend most of my \
+            free time experimenting and hacking so I can get better. The rest of the time I \
+            write songs, cycle, and learning ";
+                
             var body = new Surface({
                 size: [undefined, undefined],
+                class: ['body'],
                 properties: {
-                    backgroundColor: 'gray',
+                    backgroundColor: 'rgba(0, 0, 0, 0.76)',
                 }
             });
             
@@ -255,36 +264,84 @@ define(function(require, exports, module) {
             
             scrollview.sequenceFrom(surfaces);
     
-            for (i = 0; i < 1000; i++) {
+            var nameSurface = new Surface({
+                content: "McLean Hunsinger Erskine",
+                size: [370, 60],
+                properties: {
+                    fontFamily: 'Special Elite',
+                    textAlign: 'center',
+                    lineHeight: "60px",
+                    padding: "0 10px",
+                    fontSize: "25px",
+                    color: 'white'
+                }
+            });
+            
+            var nameModifier = new Modifier({
+                origin: [1,0]
+            });
+
+            var nameNode = new RenderNode(nameModifier);
+            nameNode.add(nameSurface);
+            
+            var aboutText = new Surface({
+                content: aboutSummary,
+                size: [600, undefined],
+                properties: {
+                    fontFamily: 'Special Elite',
+                    textAlign: 'left',
+                    lineHeight: "20px",
+                    padding: "0 10px",
+                    fontSize: "20px",
+                    color: 'white'
+                }
+            });
+            
+            var textMod = new Modifier({
+                origin: [0.5, 0.5]
+            });
+            
+            var textNode = new RenderNode(textMod);
+            textNode.add(aboutText);
+            
+            surfaces.push(nameNode);
+            
+            surfaces.push(textNode);
+            
+            
+            // for (i = 0; i < 1000; i++) {
                 
                 
-                var surface = new Surface({
-                    size: [undefined, 90],
-                    content: "surface " + (i + 1),
-                    properties: {
-                        color: "#ffffff",
-                        backgroundColor : "hsl(" + (i * 360 / 50) + ", 100%, 50%)",
-                        border: "5px black solid",
-                        textAlign: 'center',
-                        lineHeight: "50px",
-                        cursor: 'default'
-                    }
-                });
+            //     var surface = new Surface({
+            //         size: [undefined, 90],
+            //         content: "surface " + (i + 1),
+            //         properties: {
+            //             color: "#ffffff",
+            //             backgroundColor : "hsl(" + (i * 360 / 50) + ", 100%, 50%)",
+            //             border: "5px black solid",
+            //             textAlign: 'center',
+            //             lineHeight: "50px",
+            //             cursor: 'default'
+            //         }
+            //     });
     
-                surface.pipe(scrollview);
-                var mod = new Modifier({
-                    transform: Transform.translate(0,0,-1)
-                });
+            //     surface.pipe(scrollview);
+                
+            //     var mod = new Modifier({
+            //         transform: Transform.translate(0,0,-1)
+            //     });
  
-                var node = new RenderNode(mod);
-                node.add(surface);
-                surfaces.push(node);
-            }
+            //     var node = new RenderNode(mod);
+            //     node.add(surface);
+            //     surfaces.push(node);
+            // }
             
-            
+        
             
             aboutSurface
-                .add(scrollview)
+                .add(scrollview);
+                
+            aboutSurface
                 .add(body);
             
             return aboutSurface; 

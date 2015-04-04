@@ -82,7 +82,15 @@ define(function(require, exports, module) {
         });
     }
     
-    function _setListeners(x){
+    function _setListeners(){
+        this.on('good morning', function(){ 
+            
+            console.log('good morning');
+            this.scales.forEach(function(scale, i) {
+               scale.set(0.2, {duration: 2000, curve: Easing.outBack});
+            });
+            
+        });
     }
     
     
@@ -227,7 +235,7 @@ define(function(require, exports, module) {
             
             pageOffset += 0.3;
             
-            scale.set(0.2, {duration: 2000, curve: Easing.outBack});
+            // scale.set(0.2, {duration: 2000, curve: Easing.outBack});
             
         }.bind(this));
         
