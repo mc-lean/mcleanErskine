@@ -60,11 +60,12 @@ define(function(require, exports, module) {
             this.erskineMove.set(
                 move, transition, 
                 function() { 
-                    this.scale.set(0, transition);
                     Timer.setTimeout(function(){
                         
-                        // this.pageView._eventOutput.emit('goodMorning'); 
-                        // this.renderCtlr.hide(); 
+                        this.scale.set(0, transition);
+                        this.mcleanMove.set(move, transition);
+                        this.pageView._eventOutput.emit('goodMorning'); 
+                        this.renderCtlr.hide(); 
                         
                     }.bind(this), 
                     300);
@@ -124,9 +125,17 @@ define(function(require, exports, module) {
         
         var mcleanModifier = new Modifier({
             origin : [0.5,0.5],
+            align: [0.5,0.5],
             size : [110, 60],
             transform : function(){
                 return Transform.translate(this.mcleanMove.get(), 0, 0); 
+            }.bind(this)
+        });
+        
+        var mcleanScale = new Modifier({
+            transform: function(){
+                var startScale = this.scale.get();
+                return Transform.scale(startScale, startScale, startScale);
             }.bind(this)
         });
         
@@ -137,22 +146,29 @@ define(function(require, exports, module) {
         
         var erskineModifier = new Modifier({
             origin : [0.5,0.5],
+            align: [0.5,0.5],
             size : [120, 60],
             transform : function(){
-                var s = this.scale.get();
-                return Transform.scale(s,s,s);
+                return Transform.translate(this.erskineMove.get(), 0, 0);
             }.bind(this)
         });
-        erskineModifier
-            .tranformFrom(Transform.translate(this.erskineMove.get(), 0, 0));
+        
+        var erskineScale = new Modifier({
+            transform: function(){
+                var startScale = this.scale.get();
+                return Transform.scale(startScale, startScale, startScale);
+            }.bind(this)
+        });
         
         
         logoNode
             .add(mcleanModifier)
+            .add(mcleanScale)
             .add(mclean);
         
         logoNode
             .add(erskineModifier)
+            .add(erskineScale)
             .add(erskine);
             
         this.renderCtlr
