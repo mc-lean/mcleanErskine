@@ -60,11 +60,11 @@ define(function(require, exports, module) {
             this.erskineMove.set(
                 move, transition, 
                 function() { 
-                    
+                    this.scale.set(0, transition);
                     Timer.setTimeout(function(){
-                                
-                        this.pageView._eventOutput.emit('goodMorning'); 
-                        this.renderCtlr.hide();
+                        
+                        // this.pageView._eventOutput.emit('goodMorning'); 
+                        // this.renderCtlr.hide(); 
                         
                     }.bind(this), 
                     300);
@@ -79,6 +79,8 @@ define(function(require, exports, module) {
         this.erskineMove = new Transitionable(0);
         this.mcleanMove = new Transitionable(0);
         this.width = new Transitionable(110);
+        this.scale = new Transitionable(1);
+        
         this.renderCtlr = new RenderCtlr({
             inTransition: {
                 curve: Easing.easeOut,
@@ -137,10 +139,12 @@ define(function(require, exports, module) {
             origin : [0.5,0.5],
             size : [120, 60],
             transform : function(){
-                return Transform.translate(this.erskineMove.get(), 0, 0); 
+                var s = this.scale.get();
+                return Transform.scale(s,s,s);
             }.bind(this)
         });
-        
+        erskineModifier
+            .tranformFrom(Transform.translate(this.erskineMove.get(), 0, 0));
         
         
         logoNode
@@ -152,7 +156,7 @@ define(function(require, exports, module) {
             .add(erskine);
             
         this.renderCtlr
-            .inOpacityFrom(function(){ return 1; }.bind(this) ); 
+            .inOpacityFrom( function(){ return 1; } ); 
         
         this.renderCtlr.show(logoNode);
         
