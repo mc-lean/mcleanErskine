@@ -51,8 +51,8 @@ define(function(require, exports, module) {
     
     function _setListeners(){
         this.xOutEvents.on('videoBlur', function(x){
-            
-            if(!x) return;      // If x (currentPage) is null return
+            console.log(x);
+            if(x === null) return;      // If x (currentPage) is null return
             
             var animation = { duration: 500, curve: 'easeIn' };
             this.currentPage = null;

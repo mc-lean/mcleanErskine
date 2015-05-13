@@ -21,7 +21,7 @@ define(function(require, exports, module) {
     // var MenuView = require('views/MenuView');
     var PageView = require('views/PageView');
     var PageData = require('data/PageData');
-
+ 
     // Constructor function for our AppView class
     function AppView() {
         // Applies View's constructor function to AppView class
@@ -51,7 +51,7 @@ define(function(require, exports, module) {
         // Set backgound image for the body after loading the intro
         document.body.style.backgroundImage = "url('https://s3.amazonaws.com/elasticbeanstalk-us-east-1-538093400772/mcleanErskine/ggBridgeBackground.jpg')";
         
-        var transition = { durration: 300, curve: 'easeIn' },
+        var transition = { durration: 300, curve: Easing.inOutCirc() },
             move = 60;
             
         this.on('slide', function(){
@@ -84,11 +84,11 @@ define(function(require, exports, module) {
         
         this.renderCtlr = new RenderCtlr({
             inTransition: {
-                curve: Easing.easeOut,
+                curve: Easing.inOutCirc,
                 duration: 1000
             },
             outTransition: {
-                curve: Easing.easeIn,
+                curve: Easing.inOutCirc,
                 duration: 1000
             },
             overlap: false
