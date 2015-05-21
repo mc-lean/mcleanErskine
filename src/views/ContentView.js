@@ -250,7 +250,7 @@ define(function(require, exports, module) {
             passion lays in front-end development. I love good design, and working with \
             good designers.  I absolutely love building good products and spend most of my \
             free time experimenting and hacking so I can get better. The rest of the time I \
-            write songs, cycle, and learning ";
+            write songs, cycle, and learn";
                 
             var body = new Surface({
                 size: [undefined, undefined],
