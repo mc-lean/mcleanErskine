@@ -129,7 +129,7 @@ define(function(require, exports, module) {
                 lineHeight: "50px",
                 cursor: "pointer",
                 fontSize: "30px",
-                color: "white"
+                color: "black"
             }
         });
 
@@ -169,7 +169,7 @@ define(function(require, exports, module) {
             
             var headerBackground = new Surface({
                 properties: {
-                    backgroundColor: "black"
+                    // backgroundColor: "black"
                 }
             });
             
@@ -185,7 +185,7 @@ define(function(require, exports, module) {
                     textAlign: 'center',
                     lineHeight: "60px",
                     fontSize: "30px",
-                    color: 'white'
+                    color: 'black'
                 }
             }); 
             
@@ -202,7 +202,7 @@ define(function(require, exports, module) {
                     lineHeight: "60px",
                     cursor: "pointer",
                     fontSize: "30px",
-                    color: "white"
+                    color: "black"
                 }
             });
             
@@ -250,7 +250,7 @@ define(function(require, exports, module) {
             passion lays in front-end development. I love good design, and working with \
             good designers.  I absolutely love building good products and spend most of my \
             free time experimenting and hacking so I can get better. The rest of the time I \
-            write songs, cycle, and learn";
+            write songs, cycle, and do stuff";
                 
             var body = new Surface({
                 size: [undefined, undefined],

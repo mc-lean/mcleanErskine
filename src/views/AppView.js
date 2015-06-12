@@ -27,8 +27,8 @@ define(function(require, exports, module) {
         // Applies View's constructor function to AppView class
         View.apply(this, arguments);
 
-        // _createLogo.call(this);
         _addListeners.call(this);
+        _createLogo.call(this);
         _createPageView.call(this);
         _createNewLogo.call(this);
     }
@@ -187,52 +187,24 @@ define(function(require, exports, module) {
     }
     
     function _createLogo() {
-        this.width = new Transitionable(110);
-        this.zMove = new Transitionable(-120);
-        var style = {
-            fontFamily: 'Special Elite',
-            overflow: 'hidden',
-            textAlign: 'left',
-            fontSize: '30px',
-            color: 'black'
-        };
         
-        var mclean = new Surface({
-            content: "mclean",
-            properties: style,
+       var logoView = new Surface({
+            content: "me",
+            size: [110,60],
+            properties: {
+                fontFamily: 'Special Elite',
+                textAlign: 'center',
+                fontSize: '30px',
+                color: 'black'
+            }
         });
         
-        var mcleanModifier = new Modifier();
-        
-        mcleanModifier
-            .sizeFrom(function(){ return [this.width.get(), 60]; }.bind(this))
-            .transformFrom(function(){ return Transform.translate(this.zMove.get(), 0, 0); }.bind(this))
-            .originFrom( [1,1] );
-        
-        var erskine = new Surface({
-            content: 'erskine',
-            properties: style,
+        var logoModifier = new StateModifier({
+            origin: [1,1]
         });
         
-        var erskineModifier = new Modifier({
-            origin : [1,1],
-        });
-        
-        erskineModifier
-            .sizeFrom(function(){ return [this.width.get() + 10, 60]; }.bind(this));
-        
-        mclean.on('click', function(){
-            this._eventOutput.emit('slide');
-        }.bind(this));
-        
-        this
-            .add(mcleanModifier)
-            .add(mclean);
-            
-        this
-            .add(erskineModifier)
-            .add(erskine);
-    }
+        this.add(logoModifier).add(logoView);
+     }
 
 
     module.exports = AppView;
