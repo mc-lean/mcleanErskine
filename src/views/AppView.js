@@ -189,18 +189,19 @@ define(function(require, exports, module) {
     function _createLogo() {
         
        var logoView = new Surface({
-            content: "me",
-            size: [110,60],
+            content: "Under Development",
+            size: [310,40],
             properties: {
                 fontFamily: 'Special Elite',
                 textAlign: 'center',
                 fontSize: '30px',
-                color: 'black'
+                color: 'rgb(202, 48, 48)'
             }
         });
         
         var logoModifier = new StateModifier({
-            origin: [1,1]
+            origin: [1,1],
+            align: [1,1]
         });
         
         this.add(logoModifier).add(logoView);
